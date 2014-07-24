@@ -1,0 +1,17 @@
+{
+  "name": "AzuneProjectWeixin",
+  "version": "0.0.0",
+  "description": "AzuneProjectWeixin",
+  "main": "app.js",
+  "author": {
+    "name": "Han",
+    "email": ""
+  },
+  "dependencies": {
+    "express": "^3.14.0",
+    "express-hbs": "^0.7.10",
+    "q": "^2.0.2",
+    "stylus": "^0.47.2",
+    "xmldoc": "^0.1.2"
+  }
+}
