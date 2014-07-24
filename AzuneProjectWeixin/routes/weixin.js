@@ -1,5 +1,5 @@
 ﻿var xml = require('xmldoc');
-var textHandle=require('QueryHandler/textHandler');
+var textHandle=require('../queryHandler');
 
 
 var TOKEN = 'weixin';
@@ -11,8 +11,10 @@ module.exports.call=function responseToRequest(req, res) {
     var echoStr = req.param('echoStr');
     if (echoStr !== undefined) {
         validation(req, res);
-    } else if(req.rawBody!=='') {
+    } else if (req.rawBody !== '') {
         Respond(req, res);
+    } else {
+        res.send("No result");
     }
 }
 
@@ -35,27 +37,63 @@ function validation(req, res) {
         res.send('');//not valid, return blank!
     }
 }
+
 function Respond(req, res) {
     // Parse the xml body. 
     var clientMsg = new xml.XmlDocument(req.rawBody);
     
-    var myOpenId = clientMsg.childNamed('ToUserName');
-    var cOpenId = clientMsg.childNamed('FromuserName');
-    var msgType = clientMsg.childNamed('MsgType');
+    var myOpenId = clientMsg.childNamed('ToUserName').val;
+    var cOpenId = clientMsg.childNamed('FromUserName').val;
+    var msgType = clientMsg.childNamed('MsgType').val;
 
     if (msgType === 'text') {
         var content = clientMsg.childNamed('Content');
-        textHandle(content, req, function (reply) { res.send(reply);});
+        textHandle(false, content, req, res).then(function (data) { res.send(buildReplyMessage('text', data, myOpenId, cOpenId)); }, function (err) {
+            var errMsg = buildReplyMessage('text', err, myOpenId, cOpenId);
+            // res.send();
+            res.send(errMsg);
+        });
+    } else {
+        res.send(buildReplyMessage('text', 'I can only handle text message right now', myOpenId, cOpenId));
     }
-    res.send(buildReplyMessage('text','I can only handle text message right now',''));
-    
-
-
-}
-
-function buildReplyMessage(type, text, url) {
-    return text;
 }
 
 
+function buildReplyMessage(type, text, fromUser, toUser, data) {
+    var header='<xml><ToUserName><![CDATA[' + toUser + ']]></ToUserName><FromUserName><![CDATA[' + fromUser + ']]></FromUserName><CreateTime>12345678</CreateTime><MsgType><![CDATA['+type+']]></MsgType>';
+    var footer = '<FuncFlag>0</FuncFlag></xml>';
+    var content;
+    if (type === 'text') {
+        content = buildTextMessage(text);
+    } else if(type==='news'){
+        content = buildNewsMessage(data);
+    } else if (type === 'music') {
+        content = buildMusicMessage(data);
+    } else {
+        content = buildTextMessage('Incorrect message type');
+    }
+    var toReturn = header + content + footer;
+    return toReturn;
+}
+function buildTextMessage(data) {
+    var toReturn = '<Content><![CDATA[' + data + ']]></Content>';
+    return toReturn;
+}
+function buildNewsMessage(data) {
+    var toReturn = '';
+    var content = '<Articles>';
+    var count = 0;
+    for (item in data) {
+        count++;
+        content += '<item><Title><![CDATA['+item.title+']]></Title> <Description><![CDATA['+item.description+']]></Description><PicUrl><![CDATA['+item.picUrl+']]></PicUrl><Url><![CDATA['+item.url+']]></Url></item>';
+    }
+    var header = '<ArticleCount>' + count + '</ArticleCount>';
+     content+= ' </Articles>';
+    toReturn = header + content;
+    return toReturn;
+}
+function buildMusicMessage(data) {
+    var toReturn = '';
+    var content = '<Music> <Title><![CDATA['+data.title+']]></Title><Description><![CDATA['+data.description+']]></Description><MusicUrl><![CDATA['+data.musicUrl+']]></MusicUrl><HQMusicUrl><![CDATA['+data.hqMusicUrl+']]></HQMusicUrl></Music>';
+}
 

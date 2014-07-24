@@ -32,7 +32,7 @@
   <ItemGroup>
     <Compile Include="helpers.js" />
     <Compile Include="index.js" />
-    <Compile Include="QueryHandler\textHandler.js" />
+    <Compile Include="queryHandler\index.js" />
     <Compile Include="routes\index.js" />
     <Compile Include="routes\user.js" />
     <Compile Include="routes\weixin.js" />
@@ -46,11 +46,11 @@
   <ItemGroup>
     <Folder Include="bin\" />
     <Folder Include="Data\" />
-    <Folder Include="QueryHandler\" />
     <Folder Include="public\" />
     <Folder Include="public\images\" />
     <Folder Include="public\javascripts\" />
     <Folder Include="public\stylesheets\" />
+    <Folder Include="queryHandler\" />
     <Folder Include="routes\" />
     <Folder Include="views\" />
   </ItemGroup>

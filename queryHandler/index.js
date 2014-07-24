@@ -37,6 +37,7 @@ function keywordMatch(req, res, premium, txtMsg) {
     return defered.promise;
 }
 
+
 function dbrun(sql) {
     var defered = Q.defer();
     database.all(sql, function (err, row) {
@@ -47,9 +48,6 @@ function dbrun(sql) {
         }
     })
     return defered.promise
-}
-function littleChicken(txtMsg, res, next) {
-
 }
 
 

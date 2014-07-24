@@ -11,7 +11,8 @@ var path = require('path');
 var stylus = require('stylus');
 var hbs = require('express-hbs');
 var helpers = require('./helpers');
-var db = require('sqlite3').verbose();
+var sqlite = require('sqlite3').verbose();
+var db = new sqlite.Database("./Data/data.dat");
 //var routes = require('./routes');
 //var user = require('./routes/user');
 
@@ -41,8 +42,9 @@ app.use(function (req, res, next) {
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
-app.use(function (req, res) {
+app.use(function (req, res,next) {
     req.db = db;
+    next();
 });
 app.use(app.router);
 app.use(require('stylus').middleware(path.join(__dirname, 'public')));
@@ -53,10 +55,10 @@ if ('development' == app.get('env')) {
     app.use(express.errorHandler());
 }
 
-//app.get('/', routes.index);
+app.get('/', routes.index);
 app.get('/users', user.list);
-app.get('/', weixin.call);
-app.post('/', weixin.call);
+app.get('/weixin/', weixin.call);
+app.post('/weixin/', weixin.call);
 
 http.createServer(app).listen(app.get('port'), function () {
     console.log('Express server listening on port ' + app.get('port'));
