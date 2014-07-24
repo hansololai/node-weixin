@@ -19,7 +19,7 @@ var db = new sqlite.Database("./Data/data.dat");
 
 var app = express();
     // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 1557);
 app.engine('hbs', hbs.express3({
     partialsDir: __dirname + '/views/partials'
 }));
@@ -41,7 +41,7 @@ app.use(function (req, res, next) {
 });
 app.use(express.json());
 app.use(express.urlencoded());
-app.use(express.methodOverride());
+//app.use(express.methodOverride());
 app.use(function (req, res,next) {
     req.db = db;
     next();
