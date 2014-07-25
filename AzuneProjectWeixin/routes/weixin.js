@@ -1,5 +1,6 @@
 ﻿var xml = require('xmldoc');
-var textHandle=require('../queryHandler');
+var textHandle = require('../queryHandler');
+var Q = require('q');
 
 
 var TOKEN = 'weixin';
@@ -56,6 +57,58 @@ function Respond(req, res) {
     } else {
         res.send(buildReplyMessage('text', 'I can only handle text message right now', myOpenId, cOpenId));
     }
+}
+    /*************************Database insert******************************/
+function saveMessage(db,fromUser, toUser, cTime, content) {
+
+}
+
+
+
+
+
+
+
+
+    /**********************************************************************/
+    /***********************Reply Message Wrapper**************************/
+    /**********************************************************************/
+
+function uploadMedia(formData, token) {
+    var defered = Q.defer();
+    var http = require('http');
+    var options = { host: 'https://api.weixin.qq.com', path: '/cgi-bin/media/uploadnews?access_token=' + token, method: 'POST' };
+    callback = function (response) {
+        var str = ''
+        response.on('data', function (chunk) {
+            str += chunk;
+        });
+
+        response.on('end', function () {
+            var obj = JSON.parse(str);
+            if (obj.error) {
+                defered.reject(obj);
+            } else {
+                defered.resolve(obj);
+            }
+        });
+    }
+    var postreq = http.request(options, callback);
+    postreq.write(JSON.stringify(formData));
+    postreq.end();
+    return defered.promise;
+}
+function buildGroupMessage(requestUrl, token, Data) {
+    var defered = Q.defer();
+    var articles = [];
+    var formData = {'articles':articles};
+    
+    for (item in Data) {
+        var article = { 'thumb_media_id': Data.mediaId, 'author': Data.author, 'title': Data.title, 'content_source_url': Data.url, 'content': Data.content, 'digest': Data.digest, 'show_cover_pic': Data.show };
+        articles += article;
+    }
+    var requestPromise = uploadMedia(formData, token).then(function (data) { defered.resolve(data); }, function (err) { defered.reject(err); });
+    defered.promise;
 }
 
 
