@@ -1,4 +1,5 @@
 ﻿var Q = require('q');
+var dbobj = require('./database');
 
     /*
     * Handle a text message and return a built xml message.
@@ -13,6 +14,7 @@ function mainHandler(premium, txtMsg, req, res) {
 }
 
 function keywordMatch(req, res, premium, txtMsg) {
+    
     var defered = Q.defer();
     var reply = function (data) {
         if (data) {
@@ -21,36 +23,23 @@ function keywordMatch(req, res, premium, txtMsg) {
             defered.reject("no data");
         }
     }
-    //Check database for keyword entry
-    database = req.db;
-    var regular = dbrun('select * from KeywordReply left join ReplyMaterial on KeywordReply.premiumReplyID=ReplyMaterial.idReplyMaterial where Keyword=' + txtMsg + ' limit 1',database);
-    if (premium) {
-        dbrun('select * from KeywordReply left join ReplyMaterial on KeywordReply.premiumReplyID=ReplyMaterial.idReplyMaterial where Keyword=' + txtMsg + ' limit 1',database).then(function (data) {
-            if (data) {
-                defered.resolve(data);
-            } else {
-                regular.then(reply);
-            }
-        });
-    } else {
-        regular.then(reply, function (err) { defered.reject(err);});
-    }
-    
+
+    dbobj.Reply.get(txtMsg, premium).then(function (data) {
+        var type = data.MsgType;
+        var toReturn = {MsgType:type};
+        if (type === 'text') {
+            toReturn.Data=data;
+            defered.resolve(toReturn);
+        } else {
+            var id = data.MediaKey;
+            dbobj.Mat.get(type, id).then(function (row) {
+                toReturn.Data = row;
+                defered.resolve(toReturn);
+            });
+        }
+        
+    });
     return defered.promise;
 }
-
-
-function dbrun(sql,database) {
-    var defered = Q.defer();
-    database.all(sql, function (err, row) {
-        if (err) {
-            defered.reject(err);
-        } else {
-            defered.resolve(row);
-        }
-    })
-    return defered.promise
-}
-
 
 module.exports = mainHandler;

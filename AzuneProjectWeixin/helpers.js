@@ -8,6 +8,7 @@
           "<a " + attrs.join(" ") + ">" + text + "</a>"
         );
     });
+    hbsInstance.registerHelper('txtBoxes', function (txtArray) { });
 }
 
 module.exports = mainHelper;

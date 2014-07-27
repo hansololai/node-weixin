@@ -58,15 +58,6 @@ function Respond(req, res) {
         res.send(buildReplyMessage('text', 'I can only handle text message right now', myOpenId, cOpenId));
     }
 }
-    /*************************Database insert******************************/
-function saveMessage(db,fromUser, toUser, cTime, content) {
-
-}
-
-
-
-
-
 
 
 

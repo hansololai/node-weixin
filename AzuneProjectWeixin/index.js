@@ -11,8 +11,7 @@ var path = require('path');
 var stylus = require('stylus');
 var hbs = require('express-hbs');
 var helpers = require('./helpers');
-var sqlite = require('sqlite3').verbose();
-var db = new sqlite.Database("./Data/data.dat");
+
 //var routes = require('./routes');
 //var user = require('./routes/user');
 
@@ -42,10 +41,7 @@ app.use(function (req, res, next) {
 app.use(express.json());
 app.use(express.urlencoded());
 //app.use(express.methodOverride());
-app.use(function (req, res,next) {
-    req.db = db;
-    next();
-});
+
 app.use(app.router);
 app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
