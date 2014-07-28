@@ -1,8 +1,10 @@
-﻿
+﻿var admin = require('./admin');
+var weixin = require('./weixin');
 /*
  * GET home page.
  */
 
-exports.index = function(req, res){
-  res.render('index', { title: 'Express' });
+module.exports = {
+    admin: admin,
+    weixin:weixin
 };

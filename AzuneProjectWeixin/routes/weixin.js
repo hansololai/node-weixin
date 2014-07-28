@@ -4,7 +4,7 @@ var Q = require('q');
 
 
 var TOKEN = 'weixin';
-module.exports.call=function responseToRequest(req, res) {
+module.exports=function responseToRequest(req, res) {
     console.log(req.param('echoStr'));
     console.log(req.query);
     console.log(req.body);
