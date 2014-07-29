@@ -17,6 +17,7 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
   <ItemGroup>
     <Content Include="bower.json" />
+    <Content Include="Client\template\message.hbs" />
     <Content Include="package.json" />
     <Content Include="public\assets\css\ghost-ui.css" />
     <Content Include="public\assets\css\ghost-ui.min.css" />
@@ -86,6 +87,8 @@
     <Content Include="public\assets\sass\modules\bourbon\_bourbon-deprecated-upcoming.scss" />
     <Content Include="public\assets\sass\modules\bourbon\_bourbon.scss" />
     <Content Include="README.md" />
+    <Compile Include="Client\models.js" />
+    <Compile Include="Client\View.js" />
     <Compile Include="public\js\model.js" />
     <Compile Include="controllers\admin.js" />
     <Compile Include="helpers.js" />
@@ -127,6 +130,7 @@
   <ItemGroup>
     <Folder Include="bin" />
     <Folder Include="Client\build\" />
+    <Folder Include="Client\template\" />
     <Folder Include="public\js\" />
     <Folder Include="Data" />
     <Folder Include="Client\" />

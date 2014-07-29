@@ -13,6 +13,8 @@
     "q": "^2.0.2",
     "stylus": "^0.47.2",
     "xmldoc": "^0.1.2",
-    "sqlite3":"*"
+    "sqlite3":"*",
+    "backbone": "*",
+    "jquery": "*"
   }
 }
