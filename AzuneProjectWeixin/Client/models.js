@@ -18,3 +18,5 @@ Message = Backbone.Model.extend({
 MessageCollection = Backbone.Collection.extend({
     model:Message,
 });
+
+module.exports = {Item:Message,List:MessageCollection};
