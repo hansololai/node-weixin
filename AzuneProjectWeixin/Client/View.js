@@ -1,10 +1,11 @@
-﻿var $ = require('jquery');
+﻿"use strict";
+var $ = require('jquery');
 var Backbone = require('backbone');
 Backbone.$=$;
-var myApp=global.myApp;
+//var myApp=global.myApp;
 var tpMsgPane = require('./template/message.hbs');
 var tpSidebar = require('./template/sidebar.hbs');
-var tpGeneral = require('./template/message.hbs');
+var tpGeneral = require('./template/general.hbs');
 var Settings={};
 var SettingView = Backbone.View.extend({
     initialize: function (options) {
@@ -18,7 +19,6 @@ var SettingView = Backbone.View.extend({
         
     },
     changePane: function (pane) {
-        alert('change page');
         if (!pane) {
             return;
         }
@@ -37,8 +37,9 @@ var Sidebar = Backbone.View.extend({
     initialize: function (options) {
     	
     	this.el=options.el;
+        this.render();
+
         this.menu = this.$('.settings-menu');
-        this.showContent(options.pane);
     },
     models: {},
     events: {
@@ -61,7 +62,7 @@ var Sidebar = Backbone.View.extend({
         e.preventDefault();
         var item = $(e.currentTarget),
             id = item.find('a').attr('href').substring(1);
-
+        
         this.showContent(id);
     },
 
@@ -70,16 +71,20 @@ var Sidebar = Backbone.View.extend({
         
         var self = this,
             model;
-
-//        myApp.router.navigate('/settings/' + id + '/');
-//        myApp.trigger('urlchange');
+        myApp.router.navigate('/settings/' + id + '/');
+        //myApp.trigger('urlchange');
         if (this.pane && id === this.pane.id) {
             return;
         }
-        alert('switch page' + id);
-        //this.pane.destroy();
+        if(this.pane)
+        this.pane.destroy();
         this.setActive(id);
-        this.pane = new Settings[id]({ el: '.settings-content' });
+        var toDisplay=Settings[id];
+        if(toDisplay){
+        	this.pane =new toDisplay({ el: '.settings-content' }); 
+        }else{
+        	this.pane=new Settings.Pane({ el: '.settings-content' });
+        }
         this.pane.render();
 //
 //        if (!this.models.hasOwnProperty(this.pane.options.modelType)) {
@@ -99,21 +104,23 @@ var Sidebar = Backbone.View.extend({
     },
 
     setActive: function (id) {
+    	this.menu = this.$('.settings-menu');
         this.menu.find('li').removeClass('active');
         this.menu.find('a[href=#' + id + ']').parent().addClass('active');
     }
 });
-var Pane = Backbone.View.extend({
+Settings.Pane = Backbone.View.extend({
     destroy: function () {
         this.$el.removeClass('active');
         this.undelegateEvents();
     },
     render: function () {
         this.$el.hide();
-        this.$el.html();
+        this.$el.html("Selected pane does not exist");
         this.$el.fadeIn(300);
     },
     afterRender: function () {
+    	
         this.$el.attr('id', this.id);
         this.$el.addClass('active');
     },
@@ -145,7 +152,7 @@ var Pane = Backbone.View.extend({
     }
 });
     // ### General settings
- Settings.general = Pane.extend({
+ Settings.general = Settings.Pane.extend({
     id: "general",
 
 //    events: {
@@ -241,35 +248,19 @@ var Pane = Backbone.View.extend({
         }));
     },
     render: function () {
-        var ml = tpGeneral().substring(1);
+        var ml = tpGeneral();
         
-        this.$el.html(tpGeneral());
-    },
-
-//    afterRender: function () {
-//        var self = this;
-//
-//        this.$('#permalinks').prop('checked', this.model.get('permalinks') !== '/:slug/');
-//        this.$('.js-drop-zone').upload();
-//
-//        Countable.live(document.getElementById('blog-description'), function (counter) {
-//            var descriptionContainer = self.$('.description-container .word-count');
-//            if (counter.all > 180) {
-//                descriptionContainer.css({ color: "#e25440" });
-//            } else {
-//                descriptionContainer.css({ color: "#9E9D95" });
-//            }
-//
-//            descriptionContainer.text(200 - counter.all);
-//
-//        });
-//
-//        Settings.Pane.prototype.afterRender.call(this);
-//    }
+        this.$el.html(ml);
+        this.$el.attr('id', this.id);
+        this.$el.addClass('active');
+    }
 });
-Settings.message = Pane.extend({
-    id: "general",
+Settings.messages = Settings.Pane.extend({
+    id: "messages",
     render: function () {
+    	this.$el.html(tpMsgPane());
+        this.$el.attr('id', this.id);
+        this.$el.addClass('active');
     }
 });
 module.exports={

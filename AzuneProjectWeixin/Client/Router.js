@@ -6,6 +6,7 @@ var $ = require('jquery');
 var Backbone = require('backbone');
 Backbone.$=$;
 var View=require('./View');
+
 var Router=Backbone.Router.extend({
 	routes: {
         'settings(/:pane)/' : 'settings',
@@ -13,7 +14,7 @@ var Router=Backbone.Router.extend({
     },
     settings: function (pane) {
         if (!pane) {
-        	alert('redirect');
+        	
             // Redirect to settings/general if no pane supplied
             this.navigate('/settings/general/', {
                 trigger: true,
@@ -21,9 +22,9 @@ var Router=Backbone.Router.extend({
             });
             return;
         }
+        
         if (!myApp.currentView){
-            myApp.currentView = new View.Setting({ el: '#main', pane: pane });
-            myApp.currentView.render();
+            myApp.currentView = new View.Setting({ el: '#main', pane: pane });            
         }
 // only update the currentView if we don't already have a Settings view
 //        if (!Ghost.currentView || !(Ghost.currentView instanceof Ghost.Views.Settings)) {

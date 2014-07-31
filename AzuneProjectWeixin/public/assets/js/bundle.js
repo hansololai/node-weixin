@@ -7,6 +7,7 @@ var $ = require('jquery');
 var Backbone = require('backbone');
 Backbone.$=$;
 var View=require('./View');
+
 var Router=Backbone.Router.extend({
 	routes: {
         'settings(/:pane)/' : 'settings',
@@ -14,7 +15,7 @@ var Router=Backbone.Router.extend({
     },
     settings: function (pane) {
         if (!pane) {
-        	alert('redirect');
+        	
             // Redirect to settings/general if no pane supplied
             this.navigate('/settings/general/', {
                 trigger: true,
@@ -22,9 +23,9 @@ var Router=Backbone.Router.extend({
             });
             return;
         }
+        
         if (!myApp.currentView){
-            myApp.currentView = new View.Setting({ el: '#main', pane: pane });
-            myApp.currentView.render();
+            myApp.currentView = new View.Setting({ el: '#main', pane: pane });            
         }
 // only update the currentView if we don't already have a Settings view
 //        if (!Ghost.currentView || !(Ghost.currentView instanceof Ghost.Views.Settings)) {
@@ -34,15 +35,15 @@ var Router=Backbone.Router.extend({
 	
 });
 module.exports=Router;
-},{"./View":2,"backbone":7,"jquery":17}],2:[function(require,module,exports){
-(function (global){
-﻿var $ = require('jquery');
+},{"./View":2,"backbone":9,"jquery":18}],2:[function(require,module,exports){
+"use strict";
+var $ = require('jquery');
 var Backbone = require('backbone');
 Backbone.$=$;
-var myApp=global.myApp;
+//var myApp=global.myApp;
 var tpMsgPane = require('./template/message.hbs');
 var tpSidebar = require('./template/sidebar.hbs');
-var tpGeneral = require('./template/message.hbs');
+var tpGeneral = require('./template/general.hbs');
 var Settings={};
 var SettingView = Backbone.View.extend({
     initialize: function (options) {
@@ -56,7 +57,6 @@ var SettingView = Backbone.View.extend({
         
     },
     changePane: function (pane) {
-        alert('change page');
         if (!pane) {
             return;
         }
@@ -75,8 +75,9 @@ var Sidebar = Backbone.View.extend({
     initialize: function (options) {
     	
     	this.el=options.el;
+        this.render();
+
         this.menu = this.$('.settings-menu');
-        this.showContent(options.pane);
     },
     models: {},
     events: {
@@ -99,7 +100,7 @@ var Sidebar = Backbone.View.extend({
         e.preventDefault();
         var item = $(e.currentTarget),
             id = item.find('a').attr('href').substring(1);
-
+        
         this.showContent(id);
     },
 
@@ -108,16 +109,20 @@ var Sidebar = Backbone.View.extend({
         
         var self = this,
             model;
-
-//        myApp.router.navigate('/settings/' + id + '/');
-//        myApp.trigger('urlchange');
+        myApp.router.navigate('/settings/' + id + '/');
+        //myApp.trigger('urlchange');
         if (this.pane && id === this.pane.id) {
             return;
         }
-        alert('switch page' + id);
-        //this.pane.destroy();
+        if(this.pane)
+        this.pane.destroy();
         this.setActive(id);
-        this.pane = new Settings[id]({ el: '.settings-content' });
+        var toDisplay=Settings[id];
+        if(toDisplay){
+        	this.pane =new toDisplay({ el: '.settings-content' }); 
+        }else{
+        	this.pane=new Settings.Pane({ el: '.settings-content' });
+        }
         this.pane.render();
 //
 //        if (!this.models.hasOwnProperty(this.pane.options.modelType)) {
@@ -137,21 +142,29 @@ var Sidebar = Backbone.View.extend({
     },
 
     setActive: function (id) {
+    	this.menu = this.$('.settings-menu');
+    	var element=this.menu.find('a[href=#' + id + ']');
+    	alert(element.toArray());
+    	for(var item in element){
+    		console.log(item+' '+element[item]);
+    	}
+    	
         this.menu.find('li').removeClass('active');
         this.menu.find('a[href=#' + id + ']').parent().addClass('active');
     }
 });
-var Pane = Backbone.View.extend({
+Settings.Pane = Backbone.View.extend({
     destroy: function () {
         this.$el.removeClass('active');
         this.undelegateEvents();
     },
     render: function () {
         this.$el.hide();
-        this.$el.html();
+        this.$el.html("Selected pane does not exist");
         this.$el.fadeIn(300);
     },
     afterRender: function () {
+    	
         this.$el.attr('id', this.id);
         this.$el.addClass('active');
     },
@@ -183,7 +196,7 @@ var Pane = Backbone.View.extend({
     }
 });
     // ### General settings
- Settings.general = Pane.extend({
+ Settings.general = Settings.Pane.extend({
     id: "general",
 
 //    events: {
@@ -280,34 +293,18 @@ var Pane = Backbone.View.extend({
     },
     render: function () {
         var ml = tpGeneral();
-        alert(ml);
-        this.$el.html(tpGeneral());
-    },
-
-//    afterRender: function () {
-//        var self = this;
-//
-//        this.$('#permalinks').prop('checked', this.model.get('permalinks') !== '/:slug/');
-//        this.$('.js-drop-zone').upload();
-//
-//        Countable.live(document.getElementById('blog-description'), function (counter) {
-//            var descriptionContainer = self.$('.description-container .word-count');
-//            if (counter.all > 180) {
-//                descriptionContainer.css({ color: "#e25440" });
-//            } else {
-//                descriptionContainer.css({ color: "#9E9D95" });
-//            }
-//
-//            descriptionContainer.text(200 - counter.all);
-//
-//        });
-//
-//        Settings.Pane.prototype.afterRender.call(this);
-//    }
+        
+        this.$el.html(ml);
+        this.$el.attr('id', this.id);
+        this.$el.addClass('active');
+    }
 });
-Settings.message = Pane.extend({
-    id: "general",
+Settings.messages = Settings.Pane.extend({
+    id: "messages",
     render: function () {
+    	this.$el.html(tpMsgPane());
+        this.$el.attr('id', this.id);
+        this.$el.addClass('active');
     }
 });
 module.exports={
@@ -315,8 +312,7 @@ module.exports={
 		Sidebar:Sidebar,
 		Panes:Settings,
 };
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./template/message.hbs":5,"./template/sidebar.hbs":6,"backbone":7,"jquery":17}],3:[function(require,module,exports){
+},{"./template/general.hbs":5,"./template/message.hbs":6,"./template/sidebar.hbs":7,"backbone":9,"jquery":18}],3:[function(require,module,exports){
 (function (global){
 ﻿(function(){
 	var $ = require('jquery');
@@ -344,7 +340,7 @@ init();
 
 }());
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Router":1,"./View":2,"./models":4,"backbone":7,"jquery":17}],4:[function(require,module,exports){
+},{"./Router":1,"./View":2,"./models":4,"backbone":9,"jquery":18}],4:[function(require,module,exports){
 var Backbone = require('backbone');
 $ = require('jquery')(window);
 
@@ -367,21 +363,90 @@ var MessageCollection = Backbone.Collection.extend({
 });
 
 module.exports = {Item:Message,List:MessageCollection};
-},{"backbone":7,"jquery":17}],5:[function(require,module,exports){
+},{"backbone":9,"jquery":18}],5:[function(require,module,exports){
+// hbsfy compiled Handlebars template
+var Handlebars = require('hbsfy/runtime');
+module.exports = Handlebars.template({"1":function(depth0,helpers,partials,data) {
+  var helper, functionType="function", escapeExpression=this.escapeExpression;
+  return "\n                    <a class=\"js-modal-logo\" href=\"#\"><img id=\"blog-logo\" src=\""
+    + escapeExpression(((helper = helpers.logo || (depth0 && depth0.logo)),(typeof helper === functionType ? helper.call(depth0, {"name":"logo","hash":{},"data":data}) : helper)))
+    + "\" alt=\"logo\"></a>\n                ";
+},"3":function(depth0,helpers,partials,data) {
+  return "\n                    <a class=\"button-add js-modal-logo\" >Upload Image</a>\n                ";
+  },"5":function(depth0,helpers,partials,data) {
+  var helper, functionType="function", escapeExpression=this.escapeExpression;
+  return "\n                    <a class=\"js-modal-cover\" href=\"#\"><img id=\"blog-cover\" src=\""
+    + escapeExpression(((helper = helpers.cover || (depth0 && depth0.cover)),(typeof helper === functionType ? helper.call(depth0, {"name":"cover","hash":{},"data":data}) : helper)))
+    + "\" alt=\"cover photo\"></a>\n                ";
+},"7":function(depth0,helpers,partials,data) {
+  return "\n                    <a class=\"button-add js-modal-cover\">Upload Image</a>\n                ";
+  },"9":function(depth0,helpers,partials,data) {
+  var stack1, helper, functionType="function", escapeExpression=this.escapeExpression, buffer = "\n                        <option value=\""
+    + escapeExpression(((helper = helpers.name || (depth0 && depth0.name)),(typeof helper === functionType ? helper.call(depth0, {"name":"name","hash":{},"data":data}) : helper)))
+    + "\" ";
+  stack1 = helpers['if'].call(depth0, (depth0 && depth0.active), {"name":"if","hash":{},"fn":this.program(10, data),"inverse":this.noop,"data":data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += ">";
+  stack1 = helpers['if'].call(depth0, (depth0 && depth0['package']), {"name":"if","hash":{},"fn":this.program(12, data),"inverse":this.program(14, data),"data":data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "</option>\n                        ";
+  stack1 = helpers.unless.call(depth0, (depth0 && depth0['package']), {"name":"unless","hash":{},"fn":this.program(16, data),"inverse":this.noop,"data":data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  return buffer + "\n                    ";
+},"10":function(depth0,helpers,partials,data) {
+  return "selected";
+  },"12":function(depth0,helpers,partials,data) {
+  var stack1, functionType="function", escapeExpression=this.escapeExpression;
+  return escapeExpression(((stack1 = ((stack1 = (depth0 && depth0['package'])),stack1 == null || stack1 === false ? stack1 : stack1.name)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + " - "
+    + escapeExpression(((stack1 = ((stack1 = (depth0 && depth0['package'])),stack1 == null || stack1 === false ? stack1 : stack1.version)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1));
+},"14":function(depth0,helpers,partials,data) {
+  var helper, functionType="function", escapeExpression=this.escapeExpression;
+  return escapeExpression(((helper = helpers.name || (depth0 && depth0.name)),(typeof helper === functionType ? helper.call(depth0, {"name":"name","hash":{},"data":data}) : helper)));
+  },"16":function(depth0,helpers,partials,data) {
+  var helper, functionType="function", escapeExpression=this.escapeExpression;
+  return "<script>console.log('Hi! The theme named \""
+    + escapeExpression(((helper = helpers.name || (depth0 && depth0.name)),(typeof helper === functionType ? helper.call(depth0, {"name":"name","hash":{},"data":data}) : helper)))
+    + "\" does not have a package.json file or it\\'s malformed. This will be required in the future. For more info, see http://docs.ghost.org/themes/.');</script>";
+},"compiler":[5,">= 2.0.0"],"main":function(depth0,helpers,partials,data) {
+  var stack1, helper, functionType="function", escapeExpression=this.escapeExpression, buffer = "<header>\n    <button class=\"button-back\">Back</button>\n    <h2 class=\"title\">General</h2>\n    <section class=\"page-actions\">\n        <button class=\"button-save\">Save</button>\n    </section>\n</header>\n\n<section class=\"content\">\n    <form id=\"settings-general\" novalidate=\"novalidate\">\n        <fieldset>\n\n            <div class=\"form-group\">\n                <label for=\"blog-title\">Blog Title</label>\n                <input id=\"blog-title\" name=\"general[title]\" type=\"text\" value=\""
+    + escapeExpression(((helper = helpers.title || (depth0 && depth0.title)),(typeof helper === functionType ? helper.call(depth0, {"name":"title","hash":{},"data":data}) : helper)))
+    + "\" />\n                <p>The name of your blog</p>\n            </div>\n\n            <div class=\"form-group description-container\">\n                <label for=\"blog-description\">Blog Description</label>\n                <textarea id=\"blog-description\">"
+    + escapeExpression(((helper = helpers.description || (depth0 && depth0.description)),(typeof helper === functionType ? helper.call(depth0, {"name":"description","hash":{},"data":data}) : helper)))
+    + "</textarea>\n                <p>\n                    Describe what your blog is about\n                    <span class=\"word-count\">0</span>\n                </p>\n\n            </div>\n        </fieldset>\n            <div class=\"form-group\">\n                <label for=\"blog-logo\">Blog Logo</label>\n                ";
+  stack1 = helpers['if'].call(depth0, (depth0 && depth0.logo), {"name":"if","hash":{},"fn":this.program(1, data),"inverse":this.program(3, data),"data":data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n                <p>Display a sexy logo for your publication</p>\n            </div>\n\n            <div class=\"form-group\">\n                <label for=\"blog-cover\">Blog Cover</label>\n                ";
+  stack1 = helpers['if'].call(depth0, (depth0 && depth0.cover), {"name":"if","hash":{},"fn":this.program(5, data),"inverse":this.program(7, data),"data":data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n                <p>Display a cover image on your site</p>\n            </div>\n        <fieldset>\n            <div class=\"form-group\">\n                <label for=\"email-address\">Email Address</label>\n                <input id=\"email-address\" name=\"general[email-address]\" type=\"email\" value=\""
+    + escapeExpression(((helper = helpers.email || (depth0 && depth0.email)),(typeof helper === functionType ? helper.call(depth0, {"name":"email","hash":{},"data":data}) : helper)))
+    + "\" autocapitalize=\"off\" autocorrect=\"off\" />\n                <p>Address to use for admin notifications</p>\n            </div>\n\n            <div class=\"form-group\">\n                <label for=\"postsPerPage\">Posts per page</label>\n                <input id=\"postsPerPage\" name=\"general[postsPerPage]\" type=\"number\" value=\""
+    + escapeExpression(((helper = helpers.postsPerPage || (depth0 && depth0.postsPerPage)),(typeof helper === functionType ? helper.call(depth0, {"name":"postsPerPage","hash":{},"data":data}) : helper)))
+    + "\" />\n                <p>How many posts should be displayed on each page</p>\n            </div>\n\n            <div class=\"form-group\">\n                <label for=\"permalinks\">Dated Permalinks</label>\n                <input id=\"permalinks\" name=\"general[permalinks]\" type=\"checkbox\" value='permalink'/>\n                <label class=\"checkbox\" for=\"permalinks\"></label>\n                <p>Include the date in your post URLs</p>\n            </div>\n\n            <div class=\"form-group\">\n                <label for=\"activeTheme\">Theme</label>\n                <select id=\"activeTheme\" name=\"general[activeTheme]\">\n                    ";
+  stack1 = helpers.each.call(depth0, (depth0 && depth0.availableThemes), {"name":"each","hash":{},"fn":this.program(9, data),"inverse":this.noop,"data":data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  return buffer + "\n                </select>\n                <p>Select a theme for your blog</p>\n            </div>\n\n        </fieldset>\n    </form>\n</section>\n";
+},"useData":true});
+
+},{"hbsfy/runtime":8}],6:[function(require,module,exports){
 // hbsfy compiled Handlebars template
 var Handlebars = require('hbsfy/runtime');
 module.exports = Handlebars.template({"compiler":[5,">= 2.0.0"],"main":function(depth0,helpers,partials,data) {
-  return "﻿<table>\r\n\r\n</table>";
+  return "﻿<header>\n    <button class=\"button-back\">Back</button>\n    <h2 class=\"title\">Messages</h2>\n</header>\n<section class=\"content\">\n<table>\n\n</table>\n</section>";
   },"useData":true});
 
-},{"hbsfy/runtime":16}],6:[function(require,module,exports){
+},{"hbsfy/runtime":8}],7:[function(require,module,exports){
 // hbsfy compiled Handlebars template
 var Handlebars = require('hbsfy/runtime');
 module.exports = Handlebars.template({"compiler":[5,">= 2.0.0"],"main":function(depth0,helpers,partials,data) {
-  return "﻿<header>\r\n    <h1 class=\"title\">Settings</h1>\r\n</header>\r\n<nav class=\"settings-menu\">\r\n    <ul>\r\n        <li class=\"general\"><a href=\"#general\">General</a></li>\r\n        <li class=\"users\"><a href=\"#user\">User</a></li>\r\n        <li class=\"apps\"><a href=\"#apps\">Apps</a></li>\r\n    </ul>\r\n</nav>";
+  return "﻿<header>\n    <h1 class=\"title\">Settings</h1>\n</header>\n<nav class=\"settings-menu\">\n    <ul>\n        <li class=\"general\"><a href=\"#general\">General</a></li>\n        <li class=\"users\"><a href=\"#user\">User</a>\n        <ul>\n        <li class=\"users\"><a href=\"#user\">little User</a></li>\n        </ul>\n        </li>\n        \n        <li class=\"apps\"><a href=\"#apps\">Apps</a></li>\n         <li class=\"apps\"><a href=\"#messages\">Messages</a></li>\n          <li class=\"apps\"><a href=\"#keywordreply\">Keyword Reply</a></li>\n           <li class=\"apps\"><a href=\"#replymaterial\">Reply Materials</a></li>\n    </ul>\n</nav>";
   },"useData":true});
 
-},{"hbsfy/runtime":16}],7:[function(require,module,exports){
+},{"hbsfy/runtime":8}],8:[function(require,module,exports){
+module.exports = require("handlebars/runtime")["default"];
+
+},{"handlebars/runtime":17}],9:[function(require,module,exports){
 //     Backbone.js 1.1.2
 
 //     (c) 2010-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -1991,7 +2056,7 @@ module.exports = Handlebars.template({"compiler":[5,">= 2.0.0"],"main":function(
 
 }));
 
-},{"underscore":8}],8:[function(require,module,exports){
+},{"underscore":10}],10:[function(require,module,exports){
 //     Underscore.js 1.6.0
 //     http://underscorejs.org
 //     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -3336,7 +3401,7 @@ module.exports = Handlebars.template({"compiler":[5,">= 2.0.0"],"main":function(
   }
 }).call(this);
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 /*globals Handlebars: true */
 var base = require("./handlebars/base");
@@ -3369,7 +3434,7 @@ var Handlebars = create();
 Handlebars.create = create;
 
 exports["default"] = Handlebars;
-},{"./handlebars/base":10,"./handlebars/exception":11,"./handlebars/runtime":12,"./handlebars/safe-string":13,"./handlebars/utils":14}],10:[function(require,module,exports){
+},{"./handlebars/base":12,"./handlebars/exception":13,"./handlebars/runtime":14,"./handlebars/safe-string":15,"./handlebars/utils":16}],12:[function(require,module,exports){
 "use strict";
 var Utils = require("./utils");
 var Exception = require("./exception")["default"];
@@ -3602,7 +3667,7 @@ exports.log = log;var createFrame = function(object) {
   return frame;
 };
 exports.createFrame = createFrame;
-},{"./exception":11,"./utils":14}],11:[function(require,module,exports){
+},{"./exception":13,"./utils":16}],13:[function(require,module,exports){
 "use strict";
 
 var errorProps = ['description', 'fileName', 'lineNumber', 'message', 'name', 'number', 'stack'];
@@ -3631,7 +3696,7 @@ function Exception(message, node) {
 Exception.prototype = new Error();
 
 exports["default"] = Exception;
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 var Utils = require("./utils");
 var Exception = require("./exception")["default"];
@@ -3805,7 +3870,7 @@ exports.noop = noop;function initData(context, data) {
   }
   return data;
 }
-},{"./base":10,"./exception":11,"./utils":14}],13:[function(require,module,exports){
+},{"./base":12,"./exception":13,"./utils":16}],15:[function(require,module,exports){
 "use strict";
 // Build out our basic SafeString type
 function SafeString(string) {
@@ -3817,7 +3882,7 @@ SafeString.prototype.toString = function() {
 };
 
 exports["default"] = SafeString;
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 "use strict";
 /*jshint -W004 */
 var SafeString = require("./safe-string")["default"];
@@ -3902,15 +3967,12 @@ exports.isEmpty = isEmpty;function appendContextPath(contextPath, id) {
 }
 
 exports.appendContextPath = appendContextPath;
-},{"./safe-string":13}],15:[function(require,module,exports){
+},{"./safe-string":15}],17:[function(require,module,exports){
 // Create a simple path alias to allow browserify to resolve
 // the runtime on a supported path.
 module.exports = require('./dist/cjs/handlebars.runtime');
 
-},{"./dist/cjs/handlebars.runtime":9}],16:[function(require,module,exports){
-module.exports = require("handlebars/runtime")["default"];
-
-},{"handlebars/runtime":15}],17:[function(require,module,exports){
+},{"./dist/cjs/handlebars.runtime":11}],18:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.1
  * http://jquery.com/
