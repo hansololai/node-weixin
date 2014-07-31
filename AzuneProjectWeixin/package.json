@@ -8,13 +8,16 @@
     "email": ""
   },
   "dependencies": {
+    "backbone": "*",
+    "browserify": "*",
     "express": "^3.14.0",
     "express-hbs": "^0.7.10",
+    "handlebars": "*",
+    "hbsfy": "*",
+    "jquery": "*",
     "q": "^2.0.2",
-    "stylus": "^0.47.2",
-    "xmldoc": "^0.1.2",
-    "sqlite3":"*",
-    "backbone": "*",
-    "jquery": "*"
+    "sqlite3": "*",
+    "stylus": "^0.47.3",
+    "xmldoc": "^0.1.2"
   }
 }
