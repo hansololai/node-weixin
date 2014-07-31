@@ -21,13 +21,14 @@ var Router=Backbone.Router.extend({
             });
             return;
         }
-
-        myApp.currentView=new View.Setting({el:'#main',pane:pane});
-        // only update the currentView if we don't already have a Settings view
+        if (!myApp.currentView){
+            myApp.currentView = new View.Setting({ el: '#main', pane: pane });
+            myApp.currentView.render();
+        }
+// only update the currentView if we don't already have a Settings view
 //        if (!Ghost.currentView || !(Ghost.currentView instanceof Ghost.Views.Settings)) {
 //            Ghost.currentView = new Ghost.Views.Settings({ el: '#main', pane: pane });
 //        }
-        myApp.currentView.render();
     }
 	
 });

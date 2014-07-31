@@ -18,6 +18,7 @@ var SettingView = Backbone.View.extend({
         
     },
     changePane: function (pane) {
+        alert('change page');
         if (!pane) {
             return;
         }
@@ -49,9 +50,11 @@ var Sidebar = Backbone.View.extend({
 //    	}
     	//this.el.html(tpSidebar());
     
-        this.$(this.el).html("bb");
-        this.$(this.el).show();
-   	 alert(this.$(this.el).text());
+        //$(this.el).html("bb");
+        var ml = tpSidebar({});
+        ml=ml.substring(1);
+        this.$el.html('');
+       this.$el.html(ml);
     	return this;
     },
     switchPane: function (e) {
@@ -63,6 +66,8 @@ var Sidebar = Backbone.View.extend({
     },
 
     showContent: function (id) {
+        
+        
         var self = this,
             model;
 
@@ -71,9 +76,11 @@ var Sidebar = Backbone.View.extend({
         if (this.pane && id === this.pane.id) {
             return;
         }
+        alert('switch page' + id);
         //this.pane.destroy();
         this.setActive(id);
         this.pane = new Settings[id]({ el: '.settings-content' });
+        this.pane.render();
 //
 //        if (!this.models.hasOwnProperty(this.pane.options.modelType)) {
 //            model = this.models[this.pane.options.modelType] = new Ghost.Models[this.pane.options.modelType]();
@@ -234,7 +241,9 @@ var Pane = Backbone.View.extend({
         }));
     },
     render: function () {
-        this.$el.html(tplGeneral());
+        var ml = tpGeneral().substring(1);
+        
+        this.$el.html(tpGeneral());
     },
 
 //    afterRender: function () {
@@ -258,8 +267,13 @@ var Pane = Backbone.View.extend({
 //        Settings.Pane.prototype.afterRender.call(this);
 //    }
 });
+Settings.message = Pane.extend({
+    id: "general",
+    render: function () {
+    }
+});
 module.exports={
 		Setting:SettingView,
 		Sidebar:Sidebar,
-		General:Settings.general,
+		Panes:Settings,
 };

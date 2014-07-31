@@ -22,18 +22,19 @@ var Router=Backbone.Router.extend({
             });
             return;
         }
-
-        myApp.currentView=new View.Setting({el:'#main',pane:pane});
-        // only update the currentView if we don't already have a Settings view
+        if (!myApp.currentView){
+            myApp.currentView = new View.Setting({ el: '#main', pane: pane });
+            myApp.currentView.render();
+        }
+// only update the currentView if we don't already have a Settings view
 //        if (!Ghost.currentView || !(Ghost.currentView instanceof Ghost.Views.Settings)) {
 //            Ghost.currentView = new Ghost.Views.Settings({ el: '#main', pane: pane });
 //        }
-        myApp.currentView.render();
     }
 	
 });
 module.exports=Router;
-},{"./View":2,"backbone":8,"jquery":17}],2:[function(require,module,exports){
+},{"./View":2,"backbone":7,"jquery":17}],2:[function(require,module,exports){
 (function (global){
 ﻿var $ = require('jquery');
 var Backbone = require('backbone');
@@ -55,6 +56,7 @@ var SettingView = Backbone.View.extend({
         
     },
     changePane: function (pane) {
+        alert('change page');
         if (!pane) {
             return;
         }
@@ -86,9 +88,11 @@ var Sidebar = Backbone.View.extend({
 //    	}
     	//this.el.html(tpSidebar());
     
-        this.$(this.el).html("bb");
-        this.$(this.el).show();
-   	 alert(this.$(this.el).text());
+        //$(this.el).html("bb");
+        var ml = tpSidebar({});
+        ml=ml.substring(1);
+        this.$el.html('');
+       this.$el.html(ml);
     	return this;
     },
     switchPane: function (e) {
@@ -100,6 +104,8 @@ var Sidebar = Backbone.View.extend({
     },
 
     showContent: function (id) {
+        
+        
         var self = this,
             model;
 
@@ -108,9 +114,11 @@ var Sidebar = Backbone.View.extend({
         if (this.pane && id === this.pane.id) {
             return;
         }
+        alert('switch page' + id);
         //this.pane.destroy();
         this.setActive(id);
         this.pane = new Settings[id]({ el: '.settings-content' });
+        this.pane.render();
 //
 //        if (!this.models.hasOwnProperty(this.pane.options.modelType)) {
 //            model = this.models[this.pane.options.modelType] = new Ghost.Models[this.pane.options.modelType]();
@@ -271,7 +279,9 @@ var Pane = Backbone.View.extend({
         }));
     },
     render: function () {
-        this.$el.html(tplGeneral());
+        var ml = tpGeneral();
+        alert(ml);
+        this.$el.html(tpGeneral());
     },
 
 //    afterRender: function () {
@@ -295,13 +305,18 @@ var Pane = Backbone.View.extend({
 //        Settings.Pane.prototype.afterRender.call(this);
 //    }
 });
+Settings.message = Pane.extend({
+    id: "general",
+    render: function () {
+    }
+});
 module.exports={
 		Setting:SettingView,
 		Sidebar:Sidebar,
-		General:Settings.general,
+		Panes:Settings,
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./template/message.hbs":5,"./template/sidebar.hbs":6,"backbone":8,"jquery":17}],3:[function(require,module,exports){
+},{"./template/message.hbs":5,"./template/sidebar.hbs":6,"backbone":7,"jquery":17}],3:[function(require,module,exports){
 (function (global){
 ﻿(function(){
 	var $ = require('jquery');
@@ -316,20 +331,20 @@ global.myApp={
 var Router=require('./Router');
 var Models=require('./models');
 var View=require('./View');
-
+    
 var init=function(){
 	myApp.router=new Router();
 	Backbone.history.start({
 		pushState:true,
 		hashChange:false,
-        root: '/admin'
+        root: '/admin/'
 	});
 };
 init();
 
 }());
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Router":1,"./View":2,"./models":4,"backbone":8,"jquery":17}],4:[function(require,module,exports){
+},{"./Router":1,"./View":2,"./models":4,"backbone":7,"jquery":17}],4:[function(require,module,exports){
 var Backbone = require('backbone');
 $ = require('jquery')(window);
 
@@ -352,24 +367,21 @@ var MessageCollection = Backbone.Collection.extend({
 });
 
 module.exports = {Item:Message,List:MessageCollection};
-},{"backbone":8,"jquery":17}],5:[function(require,module,exports){
+},{"backbone":7,"jquery":17}],5:[function(require,module,exports){
 // hbsfy compiled Handlebars template
 var Handlebars = require('hbsfy/runtime');
 module.exports = Handlebars.template({"compiler":[5,">= 2.0.0"],"main":function(depth0,helpers,partials,data) {
-  return "﻿<table>\n\n</table>";
+  return "﻿<table>\r\n\r\n</table>";
   },"useData":true});
 
-},{"hbsfy/runtime":7}],6:[function(require,module,exports){
+},{"hbsfy/runtime":16}],6:[function(require,module,exports){
 // hbsfy compiled Handlebars template
 var Handlebars = require('hbsfy/runtime');
 module.exports = Handlebars.template({"compiler":[5,">= 2.0.0"],"main":function(depth0,helpers,partials,data) {
-  return "﻿<header>\n    <h1 class=\"title\">Settings</h1>\n</header>\n<nav class=\"settings-menu\">\n    <ul>\n        <li class=\"general\"><a href=\"#general\">General</a></li>\n        <li class=\"users\"><a href=\"#user\">User</a></li>\n        <li class=\"apps\"><a href=\"#apps\">Apps</a></li>\n    </ul>\n</nav>";
+  return "﻿<header>\r\n    <h1 class=\"title\">Settings</h1>\r\n</header>\r\n<nav class=\"settings-menu\">\r\n    <ul>\r\n        <li class=\"general\"><a href=\"#general\">General</a></li>\r\n        <li class=\"users\"><a href=\"#user\">User</a></li>\r\n        <li class=\"apps\"><a href=\"#apps\">Apps</a></li>\r\n    </ul>\r\n</nav>";
   },"useData":true});
 
-},{"hbsfy/runtime":7}],7:[function(require,module,exports){
-module.exports = require("handlebars/runtime")["default"];
-
-},{"handlebars/runtime":16}],8:[function(require,module,exports){
+},{"hbsfy/runtime":16}],7:[function(require,module,exports){
 //     Backbone.js 1.1.2
 
 //     (c) 2010-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -1979,7 +1991,7 @@ module.exports = require("handlebars/runtime")["default"];
 
 }));
 
-},{"underscore":9}],9:[function(require,module,exports){
+},{"underscore":8}],8:[function(require,module,exports){
 //     Underscore.js 1.6.0
 //     http://underscorejs.org
 //     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -3324,7 +3336,7 @@ module.exports = require("handlebars/runtime")["default"];
   }
 }).call(this);
 
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 /*globals Handlebars: true */
 var base = require("./handlebars/base");
@@ -3357,7 +3369,7 @@ var Handlebars = create();
 Handlebars.create = create;
 
 exports["default"] = Handlebars;
-},{"./handlebars/base":11,"./handlebars/exception":12,"./handlebars/runtime":13,"./handlebars/safe-string":14,"./handlebars/utils":15}],11:[function(require,module,exports){
+},{"./handlebars/base":10,"./handlebars/exception":11,"./handlebars/runtime":12,"./handlebars/safe-string":13,"./handlebars/utils":14}],10:[function(require,module,exports){
 "use strict";
 var Utils = require("./utils");
 var Exception = require("./exception")["default"];
@@ -3590,7 +3602,7 @@ exports.log = log;var createFrame = function(object) {
   return frame;
 };
 exports.createFrame = createFrame;
-},{"./exception":12,"./utils":15}],12:[function(require,module,exports){
+},{"./exception":11,"./utils":14}],11:[function(require,module,exports){
 "use strict";
 
 var errorProps = ['description', 'fileName', 'lineNumber', 'message', 'name', 'number', 'stack'];
@@ -3619,7 +3631,7 @@ function Exception(message, node) {
 Exception.prototype = new Error();
 
 exports["default"] = Exception;
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 var Utils = require("./utils");
 var Exception = require("./exception")["default"];
@@ -3793,7 +3805,7 @@ exports.noop = noop;function initData(context, data) {
   }
   return data;
 }
-},{"./base":11,"./exception":12,"./utils":15}],14:[function(require,module,exports){
+},{"./base":10,"./exception":11,"./utils":14}],13:[function(require,module,exports){
 "use strict";
 // Build out our basic SafeString type
 function SafeString(string) {
@@ -3805,7 +3817,7 @@ SafeString.prototype.toString = function() {
 };
 
 exports["default"] = SafeString;
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 /*jshint -W004 */
 var SafeString = require("./safe-string")["default"];
@@ -3890,12 +3902,15 @@ exports.isEmpty = isEmpty;function appendContextPath(contextPath, id) {
 }
 
 exports.appendContextPath = appendContextPath;
-},{"./safe-string":14}],16:[function(require,module,exports){
+},{"./safe-string":13}],15:[function(require,module,exports){
 // Create a simple path alias to allow browserify to resolve
 // the runtime on a supported path.
 module.exports = require('./dist/cjs/handlebars.runtime');
 
-},{"./dist/cjs/handlebars.runtime":10}],17:[function(require,module,exports){
+},{"./dist/cjs/handlebars.runtime":9}],16:[function(require,module,exports){
+module.exports = require("handlebars/runtime")["default"];
+
+},{"handlebars/runtime":15}],17:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.1
  * http://jquery.com/
