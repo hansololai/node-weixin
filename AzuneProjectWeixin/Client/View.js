@@ -1,17 +1,21 @@
-﻿var $ = require('jquery')(window);
+﻿var $ = require('jquery');
 var Backbone = require('backbone');
+Backbone.$=$;
+var myApp=global.myApp;
 var tpMsgPane = require('./template/message.hbs');
 var tpSidebar = require('./template/sidebar.hbs');
-var tpGeneral = require('./template/general.hbs');
-SettingView = Backbone.View.extend({
-    initialize: function (option) {
+var tpGeneral = require('./template/message.hbs');
+var Settings={};
+var SettingView = Backbone.View.extend({
+    initialize: function (options) {
         $(".settings-content").removeClass('active');
         this.sidebar = new Sidebar({
             el: '.settings-sidebar',
             pane: options.pane,
             model:this.model
         });
-        this.listenTo(router, 'route:settings', this.changePane);
+        this.listenTo(myApp.router, 'route:settings', this.changePane);
+        
     },
     changePane: function (pane) {
         if (!pane) {
@@ -21,14 +25,17 @@ SettingView = Backbone.View.extend({
     },
     render: function () {
         this.sidebar.render();
-        this.sidebar.renderPane();
-        this.$el.html(tpMsgPane(this.collection.toJSON()));
+//        if(!this.sidebar.pane)
+//        	this.showContent('general');
+//        else
+//        	this.sidebar.renderPane({});
     }
     
 });
-Sidebar = Backbone.View.extend({
-    initialize: function (option) {
-        this.render();
+var Sidebar = Backbone.View.extend({
+    initialize: function (options) {
+    	
+    	this.el=options.el;
         this.menu = this.$('.settings-menu');
         this.showContent(options.pane);
     },
@@ -37,7 +44,15 @@ Sidebar = Backbone.View.extend({
         'click .settings-menu li': 'switchPane'
     },
     render: function () {
-        this.$el.html(tpSidebar());
+//    	for (item in this.$el){
+//    		alert(item+" "+this.$el[item]);
+//    	}
+    	//this.el.html(tpSidebar());
+    
+        this.$(this.el).html("bb");
+        this.$(this.el).show();
+   	 alert(this.$(this.el).text());
+    	return this;
     },
     switchPane: function (e) {
         e.preventDefault();
@@ -51,24 +66,24 @@ Sidebar = Backbone.View.extend({
         var self = this,
             model;
 
-        Ghost.router.navigate('/settings/' + id + '/');
-        Ghost.trigger('urlchange');
+//        myApp.router.navigate('/settings/' + id + '/');
+//        myApp.trigger('urlchange');
         if (this.pane && id === this.pane.id) {
             return;
         }
-        _.result(this.pane, 'destroy');
+        //this.pane.destroy();
         this.setActive(id);
         this.pane = new Settings[id]({ el: '.settings-content' });
-
-        if (!this.models.hasOwnProperty(this.pane.options.modelType)) {
-            model = this.models[this.pane.options.modelType] = new Ghost.Models[this.pane.options.modelType]();
-            model.fetch().then(function () {
-                self.renderPane(model);
-            });
-        } else {
-            model = this.models[this.pane.options.modelType];
-            self.renderPane(model);
-        }
+//
+//        if (!this.models.hasOwnProperty(this.pane.options.modelType)) {
+//            model = this.models[this.pane.options.modelType] = new Ghost.Models[this.pane.options.modelType]();
+//            model.fetch().then(function () {
+//                self.renderPane(model);
+//            });
+//        } else {
+//            model = this.models[this.pane.options.modelType];
+//            self.renderPane(model);
+//        }
     },
 
     renderPane: function (model) {
@@ -81,7 +96,7 @@ Sidebar = Backbone.View.extend({
         this.menu.find('a[href=#' + id + ']').parent().addClass('active');
     }
 });
-Pane = Backbone.View.extend({
+var Pane = Backbone.View.extend({
     destroy: function () {
         this.$el.removeClass('active');
         this.undelegateEvents();
@@ -97,40 +112,40 @@ Pane = Backbone.View.extend({
     },
     saveSuccess: function (model, response, options) {
         /*jshint unused:false*/
-        Ghost.notifications.clearEverything();
-        Ghost.notifications.addItem({
-            type: 'success',
-            message: 'Saved',
-            status: 'passive'
-        });
+//        Ghost.notifications.clearEverything();
+//        Ghost.notifications.addItem({
+//            type: 'success',
+//            message: 'Saved',
+//            status: 'passive'
+//        });
     },
     saveError: function (model, xhr) {
         /*jshint unused:false*/
-        Ghost.notifications.clearEverything();
-        Ghost.notifications.addItem({
-            type: 'error',
-            message: Ghost.Views.Utils.getRequestErrorMessage(xhr),
-            status: 'passive'
-        });
+//        Ghost.notifications.clearEverything();
+//        Ghost.notifications.addItem({
+//            type: 'error',
+//            message: Ghost.Views.Utils.getRequestErrorMessage(xhr),
+//            status: 'passive'
+//        });
     },
     validationError: function (message) {
-        Ghost.notifications.clearEverything();
-        Ghost.notifications.addItem({
-            type: 'error',
-            message: message,
-            status: 'passive'
-        });
+//        Ghost.notifications.clearEverything();
+//        Ghost.notifications.addItem({
+//            type: 'error',
+//            message: message,
+//            status: 'passive'
+//        });
     }
 });
     // ### General settings
-Settings.general = Settings.Pane.extend({
+ Settings.general = Pane.extend({
     id: "general",
 
-    events: {
-        'click .button-save': 'saveSettings',
-        'click .js-modal-logo': 'showLogo',
-        'click .js-modal-cover': 'showCover'
-    },
+//    events: {
+//        'click .button-save': 'saveSettings',
+//        'click .js-modal-logo': 'showLogo',
+//        'click .js-modal-cover': 'showCover'
+//    },
 
     saveSettings: function () {
         var self = this,
@@ -222,24 +237,29 @@ Settings.general = Settings.Pane.extend({
         this.$el.html(tplGeneral());
     },
 
-    afterRender: function () {
-        var self = this;
-
-        this.$('#permalinks').prop('checked', this.model.get('permalinks') !== '/:slug/');
-        this.$('.js-drop-zone').upload();
-
-        Countable.live(document.getElementById('blog-description'), function (counter) {
-            var descriptionContainer = self.$('.description-container .word-count');
-            if (counter.all > 180) {
-                descriptionContainer.css({ color: "#e25440" });
-            } else {
-                descriptionContainer.css({ color: "#9E9D95" });
-            }
-
-            descriptionContainer.text(200 - counter.all);
-
-        });
-
-        Settings.Pane.prototype.afterRender.call(this);
-    }
+//    afterRender: function () {
+//        var self = this;
+//
+//        this.$('#permalinks').prop('checked', this.model.get('permalinks') !== '/:slug/');
+//        this.$('.js-drop-zone').upload();
+//
+//        Countable.live(document.getElementById('blog-description'), function (counter) {
+//            var descriptionContainer = self.$('.description-container .word-count');
+//            if (counter.all > 180) {
+//                descriptionContainer.css({ color: "#e25440" });
+//            } else {
+//                descriptionContainer.css({ color: "#9E9D95" });
+//            }
+//
+//            descriptionContainer.text(200 - counter.all);
+//
+//        });
+//
+//        Settings.Pane.prototype.afterRender.call(this);
+//    }
 });
+module.exports={
+		Setting:SettingView,
+		Sidebar:Sidebar,
+		General:Settings.general,
+};
