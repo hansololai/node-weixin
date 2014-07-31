@@ -70,7 +70,7 @@ function uploadMedia(formData, token) {
     var http = require('http');
     var options = { host: 'https://api.weixin.qq.com', path: '/cgi-bin/media/uploadnews?access_token=' + token, method: 'POST' };
     callback = function (response) {
-        var str = ''
+        var str = '';
         response.on('data', function (chunk) {
             str += chunk;
         });

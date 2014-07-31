@@ -1,7 +1,7 @@
 ﻿var Backbone = require('backbone');
 $ = require('jquery')(window);
 
-Message = Backbone.Model.extend({
+var Message = Backbone.Model.extend({
     initialize: function () {
         
     },
@@ -15,7 +15,7 @@ Message = Backbone.Model.extend({
     restUrl:'/api/'
 
 });
-MessageCollection = Backbone.Collection.extend({
+var MessageCollection = Backbone.Collection.extend({
     model:Message,
 });
 
