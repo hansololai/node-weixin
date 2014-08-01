@@ -1,5 +1,6 @@
 ﻿var Backbone = require('backbone');
-$ = require('jquery')(window);
+$ = require('jquery');
+Backbone.$ = $;
 
 var Message = Backbone.Model.extend({
     initialize: function () {
@@ -12,11 +13,12 @@ var Message = Backbone.Model.extend({
         Content: '',
         ReplyFor:0
     },
-    restUrl:'/api/'
+    restUrl:'/api/message'
 
 });
 var MessageCollection = Backbone.Collection.extend({
-    model:Message,
+    model: Message,
+    url: '/api/message'
 });
 
 module.exports = {Item:Message,List:MessageCollection};

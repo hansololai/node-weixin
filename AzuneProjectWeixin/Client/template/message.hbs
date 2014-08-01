@@ -4,6 +4,9 @@
 </header>
 <section class="content">
 <table>
-
+    <tr><th>User</th><th>ToUser</th><th>Content</th><th>Replied</th></tr>
+    {{#each message}}
+    <tr><td>{{FromUserName}}</td><td>{{ToUserName}}</td><td>{{Content}}</td><td>{{ReplyFor}}</td></tr>
+    {{/each}}
 </table>
 </section>

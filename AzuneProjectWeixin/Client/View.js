@@ -6,6 +6,7 @@ Backbone.$=$;
 var tpMsgPane = require('./template/message.hbs');
 var tpSidebar = require('./template/sidebar.hbs');
 var tpGeneral = require('./template/general.hbs');
+var Msg = require('./models');
 var Settings={};
 var SettingView = Backbone.View.extend({
     initialize: function (options) {
@@ -106,7 +107,23 @@ var Sidebar = Backbone.View.extend({
     setActive: function (id) {
     	this.menu = this.$('.settings-menu');
         this.menu.find('li').removeClass('active');
+        var submenu= this.menu.find('.submenu');
+        for (var i = 0; i < submenu.length; i++) {
+            submenu[i].style.display = 'none';
+        }
         this.menu.find('a[href=#' + id + ']').parent().addClass('active');
+        var ind = id.indexOf('_');
+        var frameID;
+        //It is a submenu, first make the submenu display
+        if (ind > 0) {
+            frameID= id.substring(0, ind);
+        } else {
+            frameID = id;
+        }
+        if (this.menu.find('#' + frameID).length>0) {
+            this.menu.find('#' + frameID)[0].style.display = 'block';
+        } 
+        
     }
 });
 Settings.Pane = Backbone.View.extend({
@@ -257,10 +274,28 @@ Settings.Pane = Backbone.View.extend({
 });
 Settings.messages = Settings.Pane.extend({
     id: "messages",
+    initialize: function (options){
+        
+        if (options.collection) {
+            this.collection = options.collection;
+        }else if (!this.collection) {
+            this.collection = new Msg.List();
+        }  
+    },
+
     render: function () {
-    	this.$el.html(tpMsgPane());
-        this.$el.attr('id', this.id);
-        this.$el.addClass('active');
+        var self = this;
+        var deferred = this.collection.fetch();
+        deferred.done(function () {
+            var ml = tpMsgPane({ message: self.collection.toJSON() });
+            if (ml[0] != '<') {
+                ml = ml.substring(1);
+            }
+            self.$el.html(ml);
+            self.$el.attr('id', this.id);
+            self.$el.addClass('active');
+        });
+        console.log(this.collection);
     }
 });
 module.exports={

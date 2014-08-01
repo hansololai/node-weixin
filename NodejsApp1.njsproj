@@ -89,6 +89,7 @@
     <Content Include="README.md" />
     <Compile Include="Client\models.js" />
     <Compile Include="Client\View.js" />
+    <Compile Include="controllers\restAPI.js" />
     <Compile Include="public\js\model.js" />
     <Compile Include="controllers\admin.js" />
     <Compile Include="helpers.js" />
@@ -107,6 +108,7 @@
     <Compile Include="queryHandler\database.js" />
     <Compile Include="queryHandler\index.js" />
     <Compile Include="routes\admin.js" />
+    <Compile Include="routes\api.js" />
     <Compile Include="routes\index.js" />
     <Compile Include="routes\user.js" />
     <Compile Include="routes\weixin.js" />

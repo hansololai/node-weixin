@@ -61,7 +61,7 @@ if ('development' == app.get('env')) {
     app.use(express.errorHandler());
 }
 
-
+routes.api(app);
 routes.admin(app);
 app.get('/users', user.list);
 app.get('/weixin/', routes.weixin);
