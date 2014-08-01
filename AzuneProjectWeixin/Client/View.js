@@ -87,6 +87,7 @@ var Sidebar = Backbone.View.extend({
         	this.pane=new Settings.Pane({ el: '.settings-content' });
         }
         this.pane.render();
+        
 //
 //        if (!this.models.hasOwnProperty(this.pane.options.modelType)) {
 //            model = this.models[this.pane.options.modelType] = new Ghost.Models[this.pane.options.modelType]();
@@ -131,6 +132,7 @@ Settings.Pane = Backbone.View.extend({
         this.$el.removeClass('active');
         this.undelegateEvents();
     },
+    
     render: function () {
         this.$el.hide();
         this.$el.html("Selected pane does not exist");
@@ -171,99 +173,11 @@ Settings.Pane = Backbone.View.extend({
     // ### General settings
  Settings.general = Settings.Pane.extend({
     id: "general",
-
 //    events: {
 //        'click .button-save': 'saveSettings',
 //        'click .js-modal-logo': 'showLogo',
 //        'click .js-modal-cover': 'showCover'
 //    },
-
-    saveSettings: function () {
-        var self = this,
-            title = this.$('#blog-title').val(),
-            description = this.$('#blog-description').val(),
-            email = this.$('#email-address').val(),
-            postsPerPage = this.$('#postsPerPage').val(),
-            permalinks = this.$('#permalinks').is(':checked') ? '/:year/:month/:day/:slug/' : '/:slug/',
-            validationErrors = [];
-
-        if (!validator.isLength(title, 0, 150)) {
-            validationErrors.push({ message: "Title is too long", el: $('#blog-title') });
-        }
-
-        if (!validator.isLength(description, 0, 200)) {
-            validationErrors.push({ message: "Description is too long", el: $('#blog-description') });
-        }
-
-        if (!validator.isEmail(email) || !validator.isLength(email, 0, 254)) {
-            validationErrors.push({ message: "Please supply a valid email address", el: $('#email-address') });
-        }
-
-        if (!validator.isInt(postsPerPage) || postsPerPage > 1000) {
-            validationErrors.push({ message: "Please use a number less than 1000", el: $('postsPerPage') });
-        }
-
-        if (!validator.isInt(postsPerPage) || postsPerPage < 0) {
-            validationErrors.push({ message: "Please use a number greater than 0", el: $('postsPerPage') });
-        }
-
-
-        if (validationErrors.length) {
-            validator.handleErrors(validationErrors);
-        } else {
-            this.model.save({
-                title: title,
-                description: description,
-                email: email,
-                postsPerPage: postsPerPage,
-                activeTheme: this.$('#activeTheme').val(),
-                permalinks: permalinks
-            }, {
-                success: this.saveSuccess,
-                error: this.saveError
-            }).then(function () { self.render(); });
-        }
-    },
-    showLogo: function (e) {
-        e.preventDefault();
-        var settings = this.model.toJSON();
-        this.showUpload('logo', settings.logo);
-    },
-    showCover: function (e) {
-        e.preventDefault();
-        var settings = this.model.toJSON();
-        this.showUpload('cover', settings.cover);
-    },
-    showUpload: function (key, src) {
-        var self = this,
-            upload = new Ghost.Models.uploadModal({
-                'key': key, 'src': src, 'id': this.id, 'accept': {
-                    func: function () { // The function called on acceptance
-                        var data = {};
-                        if (this.$('.js-upload-url').val()) {
-                            data[key] = this.$('.js-upload-url').val();
-                        } else {
-                            data[key] = this.$('.js-upload-target').attr('src');
-                        }
-
-                        self.model.save(data, {
-                            success: self.saveSuccess,
-                            error: self.saveError
-                        }).then(function () {
-                            self.saveSettings();
-                        });
-
-                        return true;
-                    },
-                    buttonClass: "button-save right",
-                    text: "Save" // The accept button text
-                }
-            });
-
-        this.addSubview(new Ghost.Views.Modal({
-            model: upload
-        }));
-    },
     render: function () {
         var ml = tpGeneral();
         
@@ -275,26 +189,28 @@ Settings.Pane = Backbone.View.extend({
 Settings.messages = Settings.Pane.extend({
     id: "messages",
     initialize: function (options){
-        
         if (options.collection) {
             this.collection = options.collection;
-        }else if (!this.collection) {
+        }else if (!this.collection||this.collection.length<1) {
             this.collection = new Msg.List();
-        }  
+            this.collection.fetch({reset:true});
+        }
+        
+        this.collection.on("reset", this.render, this);
     },
 
     render: function () {
-        var self = this;
-        var deferred = this.collection.fetch();
-        deferred.done(function () {
-            var ml = tpMsgPane({ message: self.collection.toJSON() });
+        	var self=this;
+        	var data=self.collection?self.collection.toJSON():{};
+            var ml = tpMsgPane({ message: data });
             if (ml[0] != '<') {
                 ml = ml.substring(1);
             }
             self.$el.html(ml);
             self.$el.attr('id', this.id);
             self.$el.addClass('active');
-        });
+
+            self.$el.append('<div>test</div>');
         console.log(this.collection);
     }
 });

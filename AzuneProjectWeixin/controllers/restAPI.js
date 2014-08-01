@@ -1,7 +1,20 @@
 ﻿Message = {
-    get: function (req, res) { },
+    get: function (req, res) {
+    	console.log(req.params.id);
+    	res.send({
+            idMessage: 1,
+            FromUserName: 'myname',
+            ToUserName: 'yourname',
+            Content: 'whatever', 
+            ReplyFor: 0
+        });
+    },
     create: function (req, res) { },
-    update: function (req, res) { },
+    update: function (req, res) { 
+    	res.send({
+			"updatedAt": "2011-08-21T18:02:52.248Z"
+		});
+    },
     all: function (req, res) {
         var toReturn =[
             {
@@ -20,7 +33,7 @@
             ];
         res.send(toReturn);
     },
-    delete: function (req, res) { }
+    del: function (req, res) { }
 };
 
 module.exports = {
