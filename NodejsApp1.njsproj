@@ -20,7 +20,7 @@
     <Content Include="Client\template\keyword.hbs" />
     <Content Include="Client\template\message.hbs" />
     <Content Include="Client\template\notification.hbs" />
-    <Content Include="Client\template\popup.hbs" />
+    <Content Include="Client\template\modals\reply.hbs" />
     <Content Include="package.json" />
     <Content Include="public\assets\css\divTable.css" />
     <Content Include="public\assets\css\ghost-ui.css" />
@@ -140,6 +140,7 @@
     <Folder Include="bin" />
     <Folder Include="Client\build\" />
     <Folder Include="Client\template\" />
+    <Folder Include="Client\template\modals\" />
     <Folder Include="public\js\" />
     <Folder Include="Data" />
     <Folder Include="Client\" />

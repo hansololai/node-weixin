@@ -16,7 +16,7 @@ Backbone.$ = $;
 var tpMsgPane = require('./template/message.hbs');
 var tpSidebar = require('./template/sidebar.hbs');
 var tpGeneral = require('./template/general.hbs');
-var tpReply = require('./template/popup.hbs');
+var tpReply = require('./template/modals/reply.hbs');
 var tpNotification = require('./template/notification.hbs');
 var tpKeyword = require('./template/keyword.hbs');
 var tpMaterial = require('./template/replymaterial.hbs');
@@ -487,7 +487,26 @@ Settings.replymaterial = Settings.Pane.extend({
         console.log(this.collection);
     },
 });
-
+Settings.ReplyView = BackboneModal.extend({
+    initialize: function (options) {
+        this.parentView = options.view;
+        this.replyTo = options.id;
+        this.insertTo = options.element;
+    },
+    template: tpReply,
+    cancelEl: '.cancel',
+    submitEl: '.ok',
+    submit: function () {
+        // get text and submit, and also refresh the collection. 
+        var content = $('.reply-content').val();
+        var msg = new Obiwang.Models.Message({ Content: content, replyTo: this.replyTo });
+        msg.url = '/api/replyMessage/';
+        msg.save();
+        if (this.parentView) {
+            this.parentView.renderReplyAfterElement({ id: this.replyTo, element: this.insertTo });
+        }
+    }
+});
 module.exports={
 		Setting:SettingView,
 		Sidebar:Sidebar,
