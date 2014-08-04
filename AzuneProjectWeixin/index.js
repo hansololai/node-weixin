@@ -17,8 +17,9 @@ var helpers = require('./helpers');
 
 var app = express();
 var curhbs = hbs.create();
-    // all environments
-app.set('port', process.env.PORT || 1558);
+// all environments
+var por = process.env.PORT;
+app.set('port', 1600);
 app.engine('hbs', curhbs.express3({
     partialsDir: __dirname + '/views/partials'
 }));

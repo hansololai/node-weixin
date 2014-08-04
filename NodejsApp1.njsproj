@@ -17,8 +17,12 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
   <ItemGroup>
     <Content Include="bower.json" />
+    <Content Include="Client\template\keyword.hbs" />
     <Content Include="Client\template\message.hbs" />
+    <Content Include="Client\template\notification.hbs" />
+    <Content Include="Client\template\popup.hbs" />
     <Content Include="package.json" />
+    <Content Include="public\assets\css\divTable.css" />
     <Content Include="public\assets\css\ghost-ui.css" />
     <Content Include="public\assets\css\ghost-ui.min.css" />
     <Content Include="public\assets\css\screen.css" />
@@ -87,7 +91,10 @@
     <Content Include="public\assets\sass\modules\bourbon\_bourbon-deprecated-upcoming.scss" />
     <Content Include="public\assets\sass\modules\bourbon\_bourbon.scss" />
     <Content Include="README.md" />
+    <Compile Include="Client\app.js" />
+    <Compile Include="Client\appView.js" />
     <Compile Include="Client\models.js" />
+    <Compile Include="Client\template\replymaterial.hbs" />
     <Compile Include="Client\View.js" />
     <Compile Include="controllers\restAPI.js" />
     <Compile Include="public\js\model.js" />
