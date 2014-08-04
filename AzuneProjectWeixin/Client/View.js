@@ -1,7 +1,7 @@
 ﻿"use strict";
 var $ = require('jquery');
-var Backbone = require('backbone');
-var BackboneModal= require('../public/assets/js/backbone.modal.js').Modal;
+//var Backbone = require('backbone');
+var Backbone= require('../public/assets/js/backbone.modal.js');
 var _=require('lodash');
 var Handlebars = require('hbsfy/runtime');
 Handlebars.registerHelper('ifCond', function (v1, v2, options) {
@@ -417,7 +417,7 @@ Settings.messages = Settings.Pane.extend({
         $('.app').html(popUpView.render().el);
     }
 });
-Settings.ReplyView = BackboneModal.extend({
+Settings.ReplyView = Backbone.Modal.extend({
     initialize: function (options){
         this.parentView = options.view;
         this.replyTo = options.id;
@@ -487,26 +487,7 @@ Settings.replymaterial = Settings.Pane.extend({
         console.log(this.collection);
     },
 });
-Settings.ReplyView = BackboneModal.extend({
-    initialize: function (options) {
-        this.parentView = options.view;
-        this.replyTo = options.id;
-        this.insertTo = options.element;
-    },
-    template: tpReply,
-    cancelEl: '.cancel',
-    submitEl: '.ok',
-    submit: function () {
-        // get text and submit, and also refresh the collection. 
-        var content = $('.reply-content').val();
-        var msg = new Obiwang.Models.Message({ Content: content, replyTo: this.replyTo });
-        msg.url = '/api/replyMessage/';
-        msg.save();
-        if (this.parentView) {
-            this.parentView.renderReplyAfterElement({ id: this.replyTo, element: this.insertTo });
-        }
-    }
-});
+
 module.exports={
 		Setting:SettingView,
 		Sidebar:Sidebar,
