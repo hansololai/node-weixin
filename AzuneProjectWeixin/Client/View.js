@@ -439,6 +439,7 @@ Settings.ReplyView = Backbone.Modal.extend({
 });
 Settings.keywordreply = Settings.Pane.extend({
     id: "keywordreply",
+    singleTemplate:Handlebars.template('<td>{{Keyword}}</td><td>{{#if RegularReply.MsgType}}{{RegularReply.MsgType}}{{/if}}</td><td>{{#if RegularReply.Title}}{{RegularReply.Title}}{{/if}}</td><td>{{#if MemberReply.MsgType}}{{MemberReply.MsgType}}{{else}}NONE{{/if}}</td><td>{{#if MemberReply.Title}}{{MemberReply.Title}}{{else}}NONE{{/if}}</td>'),
     initialize: function (options) {
         if (options.collection) {
             this.collection = options.collection;
@@ -461,6 +462,16 @@ Settings.keywordreply = Settings.Pane.extend({
         self.$el.addClass('active');
         console.log(this.collection);
     },
+    renderSingle: function (id) {
+        var thisrow = $('.' + id);
+        if (!thisrow) return;
+       
+        var thiskeyword = new Obiwang.Models.Keyword({ idKeywordReply: id });
+        thiskeyword.fetch().done(function () {
+            thisrow.empty();
+            thisrow.html(singleTemplate(thiskeyword.toJSON()));
+        });
+    }
 });
 Settings.replymaterial = Settings.Pane.extend({
     id: "replymaterial",

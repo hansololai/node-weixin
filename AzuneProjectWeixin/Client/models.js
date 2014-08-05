@@ -14,6 +14,7 @@ Models.Message = Backbone.Model.extend({
     url:'/api/message/'
 });
 Models.Keyword = Backbone.Model.extend({
+    idAttribute: "idKeywordReply",
     defaults: {
         idKeywordReply: -1,
         Keyword: '',
