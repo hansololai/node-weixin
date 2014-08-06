@@ -19,6 +19,8 @@
     <Content Include="bower.json" />
     <Content Include="Client\template\keyword.hbs" />
     <Content Include="Client\template\message.hbs" />
+    <Content Include="Client\template\modals\default.hbs" />
+    <Content Include="Client\template\modals\material.hbs" />
     <Content Include="Client\template\notification.hbs" />
     <Content Include="Client\template\modals\reply.hbs" />
     <Content Include="package.json" />

@@ -4,6 +4,7 @@ Backbone.$ = $;
 Models = {};
 Collections = {};
 Models.Message = Backbone.Model.extend({
+    idAttribute: "idMessage",
     defaults: {
         idMessage:0,
         FromUserName: '',
@@ -24,6 +25,7 @@ Models.Keyword = Backbone.Model.extend({
     url: '/api/keyword/'
 });
 Models.ReplyMaterial = Backbone.Model.extend({
+    idAttribute: "idReplyMaterial",
     defaults: {
         idReplyMaterial: 0,
         CreateTime: '',

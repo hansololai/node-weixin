@@ -17,6 +17,7 @@ var tpMsgPane = require('./template/message.hbs');
 var tpSidebar = require('./template/sidebar.hbs');
 var tpGeneral = require('./template/general.hbs');
 var tpReply = require('./template/modals/reply.hbs');
+var tpChooseMaterial = require('./template/modals/material.hbs');
 var tpNotification = require('./template/notification.hbs');
 var tpKeyword = require('./template/keyword.hbs');
 var tpMaterial = require('./template/replymaterial.hbs');
@@ -422,7 +423,7 @@ Settings.ReplyView = Backbone.Modal.extend({
         this.parentView = options.view;
         this.replyTo = options.id;
         this.insertTo = options.element;
-    },
+    }, 
     template: tpReply,
     cancelEl: '.cancel',
     submitEl: '.ok',
@@ -439,7 +440,7 @@ Settings.ReplyView = Backbone.Modal.extend({
 });
 Settings.keywordreply = Settings.Pane.extend({
     id: "keywordreply",
-    singleTemplate:Handlebars.template('<td>{{Keyword}}</td><td>{{#if RegularReply.MsgType}}{{RegularReply.MsgType}}{{/if}}</td><td>{{#if RegularReply.Title}}{{RegularReply.Title}}{{/if}}</td><td>{{#if MemberReply.MsgType}}{{MemberReply.MsgType}}{{else}}NONE{{/if}}</td><td>{{#if MemberReply.Title}}{{MemberReply.Title}}{{else}}NONE{{/if}}</td>'),
+    singleTemplate:Handlebars.template('<td>{{Keyword}}</td><td>{{#if RegularReply.MsgType}}{{RegularReply.MsgType}}{{/if}}</td><td>{{#if RegularReply.Title}}{{RegularReply.Title}}{{/if}}<button>Choose</button></td><td>{{#if MemberReply.MsgType}}{{MemberReply.MsgType}}{{else}}NONE{{/if}}</td><td>{{#if MemberReply.Title}}{{MemberReply.Title}}{{else}}NONE{{/if}}<button>Choose</button></td>'),
     initialize: function (options) {
         if (options.collection) {
             this.collection = options.collection;
@@ -449,7 +450,9 @@ Settings.keywordreply = Settings.Pane.extend({
         }
         this.collection.on("reset", this.render, this);
     },
-    
+    events: {
+        'click button': 'chooseReply'
+    },
     render: function () {
         var self = this;
         var data = self.collection?self.collection.toJSON():{};
@@ -471,10 +474,46 @@ Settings.keywordreply = Settings.Pane.extend({
             thisrow.empty();
             thisrow.html(singleTemplate(thiskeyword.toJSON()));
         });
+    },
+    chooseReply: function (e){
+        e.preventDefault();
+        var item = $(e.currentTarget);
+        //var msgID = item.attr('id').substring(1);
+        //var thisRow = item.parent().parent();
+        var popUpView;
+        //if (thisRow.hasClass('active')) {
+        //    popUpView = new Settings.ChooseReply({ view: this, id: msgID, element: thisRow });
+       // } else {
+            popUpView = new Settings.ChooseReply({});
+        //}
+        $('.app').html(popUpView.render().el);
     }
 });
+Settings.ChooseReply = Backbone.Modal.extend({
+    viewContainer:'.app',
+    initialize: function (options) {
+        this.parentView = options.view;
+        this.replyTo = options.id;
+        this.insertTo = options.element;
+    },
+    template: tpMaterial,
+    cancelEl: '.cancel',
+    submitEl: '.ok',
+    submit: function () {
+        // get text and submit, and also refresh the collection. 
+        var content = $('.reply-content').val();
+        var msg = new Obiwang.Models.Message({ Content: content, replyTo: this.replyTo });
+        msg.url = '/api/replyMessage/';
+        msg.save();
+        if (this.parentView) {
+            this.parentView.renderReplyAfterElement({ id: this.replyTo, element: this.insertTo });
+        }
+    }
+});
+
 Settings.replymaterial = Settings.Pane.extend({
     id: "replymaterial",
+    singleTemplate: Handlebars.template('<td>{{MsgType}}</td><td>{{Title}}</td><td>{{CreateTime}}</td>{{#ifCond MsgType \'text\'}}<td>{{Content}}</td><td></td>{{else}}{{#if Data.[0].Title}}<td>{{Data.[0].Title}}</td>{{else}}<td></td>{{/if}}<td><button id="{{idReplyMaterial}}">Expand</button></td>{{/ifCond}}'),  
     initialize: function (options) {
         if (options.collection) {
             this.collection = options.collection;
@@ -497,6 +536,16 @@ Settings.replymaterial = Settings.Pane.extend({
         self.$el.addClass('active');
         console.log(this.collection);
     },
+    renderSingle: function () {
+        var thisrow = $('.' + id);
+        if (!thisrow) return;
+        
+        var thismaterial = new Obiwang.Models.ReplyMaterial({ idReplyMaterial: id });
+        thiskeyword.fetch().done(function () {
+            thisrow.empty();
+            thisrow.html(singleTemplate(thiskeyword.toJSON()));
+        });
+    }
 });
 
 module.exports={
