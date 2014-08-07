@@ -486,7 +486,10 @@ Settings.keywordreply = Settings.Pane.extend({
        // } else {
             popUpView = new Settings.ChooseReply({});
         //}
-        $('.app').html(popUpView.render().el);
+        popUpView.getMaterial().done(function () { 
+            $('.app').html(popUpView.render().el);
+        });
+        
     }
 });
 Settings.ChooseReply = Backbone.Modal.extend({
@@ -496,7 +499,12 @@ Settings.ChooseReply = Backbone.Modal.extend({
         this.replyTo = options.id;
         this.insertTo = options.element;
     },
-    template: tpMaterial,
+    getMaterial: function (){
+        this.collection = new Obiwang.Collections.ReplyMaterial();
+        return this.collection.fetch();
+        
+        },
+    template: tpChooseMaterial,
     cancelEl: '.cancel',
     submitEl: '.ok',
     submit: function () {
