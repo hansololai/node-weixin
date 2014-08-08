@@ -6,7 +6,7 @@
     <table class="messages">
         <tr><th>Type</th><th>Title</th><th>Create Time</th><th>Content</th><th>Expand</th></tr>
         {{#each materials}}
-        <tr id="{{idReplyMaterial}}"><td>{{MsgType}}</td><td>{{Title}}</td><td>{{CreateTime}}</td>{{#ifCond MsgType 'text'}}<td>{{Content}}</td><td></td>{{else}}{{#if Data.[0].Title}}<td>{{Data.[0].Title}}</td>{{else}}<td></td>{{/if}}<td><button id="{{idReplyMaterial}}">Expand</button></td>{{/ifCond}}</tr>        
+        <tr id="{{idReplyMaterial}}"><td>{{MsgType}}</td><td>{{Title}}</td><td>{{CreateTime}}</td>{{#ifCond MsgType 'text'}}<td>{{Content}}</td><td></td>{{else}}{{#if Data.[0].Title}}<td>{{Data.[0].Title}}</td>{{else}}<td></td>{{/if}}<td><button class="expand">Expand</button></td>{{/ifCond}}</tr>        
         {{/each}}
     </table>
     <div class="app"></div>

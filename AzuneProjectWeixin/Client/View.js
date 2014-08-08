@@ -4,6 +4,7 @@ var $ = require('jquery');
 var Backbone= require('../public/assets/js/backbone.modal.js');
 var _=require('lodash');
 var Handlebars = require('hbsfy/runtime');
+
 Handlebars.registerHelper('ifCond', function (v1, v2, options) {
     if (v1 === v2) {
         return options.fn(this);
@@ -21,6 +22,8 @@ var tpChooseMaterial = require('./template/modals/material.hbs');
 var tpNotification = require('./template/notification.hbs');
 var tpKeyword = require('./template/keyword.hbs');
 var tpMaterial = require('./template/replymaterial.hbs');
+var tpKeywordSingle=require('./template/keyword_single.hbs');
+var tpMaterialSingle=require('./template/replymaterial_single.hbs');
 var Obiwang = require('./models');
 var Settings = {};
 var Notification = {};
@@ -440,7 +443,7 @@ Settings.ReplyView = Backbone.Modal.extend({
 });
 Settings.keywordreply = Settings.Pane.extend({
     id: "keywordreply",
-    singleTemplate:Handlebars.template('<td>{{Keyword}}</td><td>{{#if RegularReply.MsgType}}{{RegularReply.MsgType}}{{/if}}</td><td>{{#if RegularReply.Title}}{{RegularReply.Title}}{{/if}}<button class="regular">Choose</button></td><td>{{#if MemberReply.MsgType}}{{MemberReply.MsgType}}{{else}}NONE{{/if}}</td><td>{{#if MemberReply.Title}}{{MemberReply.Title}}{{else}}NONE{{/if}}<button class="member">Choose</button></td>'),
+    singleTemplate:tpKeywordSingle,
     initialize: function (options) {
         if (options.collection) {
             this.collection = options.collection;
@@ -448,32 +451,42 @@ Settings.keywordreply = Settings.Pane.extend({
             this.collection = new Obiwang.Collections.Keyword();
             this.collection.fetch({ reset: true });
         }
-        this.collection.on("reset", this.render, this);
+        this.render();
+        this.collection.on("reset", this.renderCollection, this);
     },
     events: {
-        'click  .regular': 'chooseReply',
-        'click  .member': 'chooseReply'
+        'click  button.regular': 'chooseReply',
+        'click  button.member': 'chooseReply'
     },
     render: function () {
         var self = this;
-        var data = self.collection?self.collection.toJSON():{};
-        var ml = tpKeyword({ keywords: data });
+        var ml = tpKeyword();
         if (ml[0] != '<') {
             ml = ml.substring(1);
         }
         self.$el.html(ml);
         self.$el.attr('id', this.id);
         self.$el.addClass('active');
-        console.log(this.collection);
+    },
+    renderCollection:function(){
+    	var headrow=$('#header');
+    	var self=this;
+    	this.collection.forEach(function(item){
+    		var ele = self.singleTemplate(item.toJSON());
+            var toInsert = $('<div/>').html(ele).contents();
+            toInsert.insertAfter(headrow);
+    	});    	
     },
     renderSingle: function (id) {
-        var thisrow = $('.' + id);
-        if (!thisrow) return;
+        var thisrow = $('#' + id);
+        if (this.length<1){
+        	return;
+        }
        
         var thiskeyword = new Obiwang.Models.Keyword({ idKeywordReply: id });
         thiskeyword.fetch().done(function () {
             thisrow.empty();
-            thisrow.html(singleTemplate(thiskeyword.toJSON()));
+            thisrow.replaceWith(singleTemplate(thiskeyword.toJSON()));
         });
     },
     chooseReply: function (e){
@@ -510,7 +523,7 @@ Settings.ChooseReply = Backbone.Modal.extend({
         
     },
     events: {
-        'click  .choose-reply-material': 'setReply'
+        'click  button.choose-reply-material': 'setReply'
     },
     template: tpChooseMaterial,
     cancelEl: '.cancel',
@@ -526,26 +539,29 @@ Settings.ChooseReply = Backbone.Modal.extend({
         }
     },
     submit: function () {
+    	var self=this;
         // get text and submit, and also refresh the collection. 
         var thisrow = $('.selected');
-        if (!thisrow) { 
-            return;
+        var materialId;
+        if (thisrow.length<1) { 
+            materialId=-1;
+        }else{
+        	materialId= thisrow.attr('id').substring(1);
         }
-        var materialId = thisrow.attr('id').substring(1);
         if (this.Type == 'regular') {
             this.model.RegularReply = { idReplyMaterial: materialId };
         } else {
             this.model.MemberReply = { idReplyMaterial: materialId };
         }
         this.model.save().done(function () { 
-            this.parentView.renderSingle(this.keywordId);
+        	self.parentView.renderSingle(self.keywordId);
         });
     }
 });
 
 Settings.replymaterial = Settings.Pane.extend({
     id: "replymaterial",
-    singleTemplate: Handlebars.template('<td>{{MsgType}}</td><td>{{Title}}</td><td>{{CreateTime}}</td>{{#ifCond MsgType \'text\'}}<td>{{Content}}</td><td></td>{{else}}{{#if Data.[0].Title}}<td>{{Data.[0].Title}}</td>{{else}}<td></td>{{/if}}<td><button id="{{idReplyMaterial}}">Expand</button></td>{{/ifCond}}'),  
+    singleTemplate: tpMaterialSingle,
     initialize: function (options) {
         if (options.collection) {
             this.collection = options.collection;
@@ -555,7 +571,12 @@ Settings.replymaterial = Settings.Pane.extend({
         }
         this.collection.on("reset", this.render, this);
     },
-    
+    events:{
+    	'click button.expand':'expand'
+    },
+    expand:function(){
+    	//this.renderSingle(1);
+    },
     render: function () {
         var self = this;
         var data = self.collection?self.collection.toJSON():{};
@@ -568,15 +589,19 @@ Settings.replymaterial = Settings.Pane.extend({
         self.$el.addClass('active');
         console.log(this.collection);
     },
-    renderSingle: function () {
-        var thisrow = $('.' + id);
-        if (!thisrow) return;
-        
-        var thismaterial = new Obiwang.Models.ReplyMaterial({ idReplyMaterial: id });
-        thiskeyword.fetch().done(function () {
-            thisrow.empty();
-            thisrow.html(singleTemplate(thiskeyword.toJSON()));
-        });
+    renderSingle: function (id) {
+        var thisrow = $('#' + id);
+        var self=this;
+        if (thisrow.length<1){
+        	// add a row
+        }else{
+	        
+	        var thismat= new Obiwang.Models.ReplyMaterial({ idReplyMaterial: id });
+	        thismat.fetch().done(function () {
+	            thisrow.empty();
+	            thisrow.replaceWith(self.singleTemplate(thismat.toJSON()));
+	        });
+    	}
     }
 });
 

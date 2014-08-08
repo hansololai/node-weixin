@@ -12,7 +12,7 @@ Models.Message = Backbone.Model.extend({
         Content: '',
         ReplyFor:0
     },
-    url:'/api/message/'
+    urlRoot:'/api/message/'
 });
 Models.Keyword = Backbone.Model.extend({
     idAttribute: "idKeywordReply",
@@ -22,7 +22,7 @@ Models.Keyword = Backbone.Model.extend({
         RegularReply: null,
         MemberReply: null
     },
-    url: '/api/keyword/'
+    urlRoot: '/api/keyword/'
 });
 Models.ReplyMaterial = Backbone.Model.extend({
     idAttribute: "idReplyMaterial",
@@ -33,7 +33,7 @@ Models.ReplyMaterial = Backbone.Model.extend({
         Title:'',
         Data:null
     },
-    url:'/api/replymaterial/'
+    urlRoot:'/api/replymaterial/'
 });
 Collections.Message = Backbone.Collection.extend({
     model: Models.Message,
