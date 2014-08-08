@@ -6,7 +6,7 @@
     <table class="messages">
         <tr><th>Keyword</th><th>Regular Reply Type</th><th>Regular Reply Title</th><th>Premium Reply Type</th><th>Premium Reply Title</th></tr>
         {{#each keywords}}
-        <tr id="{{idKeywordReply}}"><td>{{Keyword}}</td><td>{{#if RegularReply.MsgType}}{{RegularReply.MsgType}}{{/if}}</td><td>{{#if RegularReply.Title}}{{RegularReply.Title}}{{/if}}<button>Choose</button></td><td>{{#if MemberReply.MsgType}}{{MemberReply.MsgType}}{{else}}NONE{{/if}}</td><td>{{#if MemberReply.Title}}{{MemberReply.Title}}{{else}}NONE{{/if}}<button>Choose</button></td></tr>
+        <tr id="#{{idKeywordReply}}"><td>{{Keyword}}</td><td>{{#if RegularReply.MsgType}}{{RegularReply.MsgType}}{{/if}}</td><td>{{#if RegularReply.Title}}{{RegularReply.Title}}{{/if}}<button name="#{{idKeywordReply}}" class="regular">Choose</button></td><td>{{#if MemberReply.MsgType}}{{MemberReply.MsgType}}{{else}}NONE{{/if}}</td><td>{{#if MemberReply.Title}}{{MemberReply.Title}}{{else}}NONE{{/if}}<button name ="#{{idKeywordReply}}" class="member">Choose</button></td></tr>
         {{/each}}
     </table>
     <div class="app"></div>

@@ -440,7 +440,7 @@ Settings.ReplyView = Backbone.Modal.extend({
 });
 Settings.keywordreply = Settings.Pane.extend({
     id: "keywordreply",
-    singleTemplate:Handlebars.template('<td>{{Keyword}}</td><td>{{#if RegularReply.MsgType}}{{RegularReply.MsgType}}{{/if}}</td><td>{{#if RegularReply.Title}}{{RegularReply.Title}}{{/if}}<button>Choose</button></td><td>{{#if MemberReply.MsgType}}{{MemberReply.MsgType}}{{else}}NONE{{/if}}</td><td>{{#if MemberReply.Title}}{{MemberReply.Title}}{{else}}NONE{{/if}}<button>Choose</button></td>'),
+    singleTemplate:Handlebars.template('<td>{{Keyword}}</td><td>{{#if RegularReply.MsgType}}{{RegularReply.MsgType}}{{/if}}</td><td>{{#if RegularReply.Title}}{{RegularReply.Title}}{{/if}}<button class="regular">Choose</button></td><td>{{#if MemberReply.MsgType}}{{MemberReply.MsgType}}{{else}}NONE{{/if}}</td><td>{{#if MemberReply.Title}}{{MemberReply.Title}}{{else}}NONE{{/if}}<button class="member">Choose</button></td>'),
     initialize: function (options) {
         if (options.collection) {
             this.collection = options.collection;
@@ -451,7 +451,8 @@ Settings.keywordreply = Settings.Pane.extend({
         this.collection.on("reset", this.render, this);
     },
     events: {
-        'click button': 'chooseReply'
+        'click  .regular': 'chooseReply',
+        'click  .member': 'chooseReply'
     },
     render: function () {
         var self = this;
@@ -478,13 +479,16 @@ Settings.keywordreply = Settings.Pane.extend({
     chooseReply: function (e){
         e.preventDefault();
         var item = $(e.currentTarget);
-        //var msgID = item.attr('id').substring(1);
+        var type = item.attr('class');
+        
+        var msgID = item.attr('name').substring(1);
+        var thismodel = this.collection.get(msgID);
         //var thisRow = item.parent().parent();
-        var popUpView;
+        var popUpView = new Settings.ChooseReply({view:this,id:msgID,type:type,model:thismodel});
         //if (thisRow.hasClass('active')) {
         //    popUpView = new Settings.ChooseReply({ view: this, id: msgID, element: thisRow });
        // } else {
-            popUpView = new Settings.ChooseReply({});
+           
         //}
         popUpView.getMaterial().done(function () { 
             $('.app').html(popUpView.render().el);
@@ -496,26 +500,46 @@ Settings.ChooseReply = Backbone.Modal.extend({
     viewContainer:'.app',
     initialize: function (options) {
         this.parentView = options.view;
-        this.replyTo = options.id;
-        this.insertTo = options.element;
+        this.keywordId = options.id;
+        this.Type = options.type;
+        this.model=options.model;
     },
     getMaterial: function (){
         this.collection = new Obiwang.Collections.ReplyMaterial();
         return this.collection.fetch();
         
-        },
+    },
+    events: {
+        'click  .choose-reply-material': 'setReply'
+    },
     template: tpChooseMaterial,
     cancelEl: '.cancel',
     submitEl: '.ok',
+    setReply: function (e){
+        e.preventDefault();
+        var item = $(e.currentTarget);
+        var thisrow = item.parent().parent();
+        if (thisrow.hasClass('selected')) {
+            thisrow.removeClass('selected');
+        } else {
+            thisrow.addClass('selected');
+        }
+    },
     submit: function () {
         // get text and submit, and also refresh the collection. 
-        var content = $('.reply-content').val();
-        var msg = new Obiwang.Models.Message({ Content: content, replyTo: this.replyTo });
-        msg.url = '/api/replyMessage/';
-        msg.save();
-        if (this.parentView) {
-            this.parentView.renderReplyAfterElement({ id: this.replyTo, element: this.insertTo });
+        var thisrow = $('.selected');
+        if (!thisrow) { 
+            return;
         }
+        var materialId = thisrow.attr('id').substring(1);
+        if (this.Type == 'regular') {
+            this.model.RegularReply = { idReplyMaterial: materialId };
+        } else {
+            this.model.MemberReply = { idReplyMaterial: materialId };
+        }
+        this.model.save().done(function () { 
+            this.parentView.renderSingle(this.keywordId);
+        });
     }
 });
 
