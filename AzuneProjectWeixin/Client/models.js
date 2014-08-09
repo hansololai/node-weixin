@@ -37,7 +37,13 @@ Models.ReplyMaterial = Backbone.Model.extend({
 });
 Collections.Message = Backbone.Collection.extend({
     model: Models.Message,
-    url: '/api/message/'
+    initialize: function (options) {
+        if (options&&options.id)
+            this.skipnumber = options.id;
+        else
+            this.skipnumber = 0;
+    },
+    url: function () { return '/api/messagepage/' + this.skipnumber }
 });
 Collections.ReplyMessage = Backbone.Collection.extend({
     model: Models.Message,
@@ -54,6 +60,5 @@ Collections.ReplyMaterial = Backbone.Collection.extend({
     model: Models.ReplyMaterial,
     url:'/api/replymaterial/'
 });
-
 
 module.exports = { Models: Models,Collections:Collections };

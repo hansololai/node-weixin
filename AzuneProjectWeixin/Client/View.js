@@ -13,7 +13,7 @@ Handlebars.registerHelper('ifCond', function (v1, v2, options) {
 });
 Backbone.$ = $;
 
-//var myApp=global.myApp;
+/*************************************************All the templates *****************************/
 var tpMsgPane = require('./template/message.hbs');
 var tpSidebar = require('./template/sidebar.hbs');
 var tpGeneral = require('./template/general.hbs');
@@ -23,7 +23,9 @@ var tpNotification = require('./template/notification.hbs');
 var tpKeyword = require('./template/keyword.hbs');
 var tpMaterial = require('./template/replymaterial.hbs');
 var tpKeywordSingle=require('./template/keyword_single.hbs');
-var tpMaterialSingle=require('./template/replymaterial_single.hbs');
+var tpMaterialSingle = require('./template/replymaterial_single.hbs');
+
+/*************************************************Views for Settings *****************************/
 var Obiwang = require('./models');
 var Settings = {};
 var Notification = {};
@@ -456,8 +458,14 @@ Settings.keywordreply = Settings.Pane.extend({
     },
     events: {
         'click  button.regular': 'chooseReply',
-        'click  button.member': 'chooseReply'
+        'click  button.member': 'chooseReply',
+        'click img.remove' :'removeKeyword'
     },
+    removeKeyword: function (e){
+        var item = $(e.currentTarget);
+        var msgID = item.parent().attr('href').substring(1);
+        this.collection.get(msgID).destroy();
+        },
     render: function () {
         var self = this;
         var ml = tpKeyword();
@@ -482,11 +490,11 @@ Settings.keywordreply = Settings.Pane.extend({
         if (this.length<1){
         	return;
         }
-       
+        var self = this;
         var thiskeyword = new Obiwang.Models.Keyword({ idKeywordReply: id });
         thiskeyword.fetch().done(function () {
             thisrow.empty();
-            thisrow.replaceWith(singleTemplate(thiskeyword.toJSON()));
+            thisrow.replaceWith(self.singleTemplate(thiskeyword.toJSON()));
         });
     },
     chooseReply: function (e){
@@ -572,7 +580,13 @@ Settings.replymaterial = Settings.Pane.extend({
         this.collection.on("reset", this.render, this);
     },
     events:{
-    	'click button.expand':'expand'
+        'click button.expand': 'expand',
+        'click img.remove' : 'removeMaterial'
+    },
+    removeMaterial: function (e) {
+        var item = $(e.currentTarget);
+        var msgID = item.parent().attr('href').substring(1);
+        this.collection.get(msgID).destroy();
     },
     expand:function(){
     	//this.renderSingle(1);
