@@ -4,7 +4,10 @@ var $ = require('jquery');
 var Backbone= require('../public/assets/js/backbone.modal.js');
 var _=require('lodash');
 var Handlebars = require('hbsfy/runtime');
-
+var Obiwang = require('./models');
+var Settings = {};
+var Notification = {};
+//#region
 Handlebars.registerHelper('ifCond', function (v1, v2, options) {
     if (v1 === v2) {
         return options.fn(this);
@@ -12,7 +15,7 @@ Handlebars.registerHelper('ifCond', function (v1, v2, options) {
     return options.inverse(this);
 });
 Backbone.$ = $;
-
+//#endregion
 /*************************************************All the templates *****************************/
 var tpMsgPane = require('./template/message.hbs');
 var tpSidebar = require('./template/sidebar.hbs');
@@ -24,36 +27,9 @@ var tpKeyword = require('./template/keyword.hbs');
 var tpMaterial = require('./template/replymaterial.hbs');
 var tpKeywordSingle=require('./template/keyword_single.hbs');
 var tpMaterialSingle = require('./template/replymaterial_single.hbs');
+var tpMaterialAdd = require('./template/replymaterial_add.hbs');
 
-/*************************************************Views for Settings *****************************/
-var Obiwang = require('./models');
-var Settings = {};
-var Notification = {};
-var SettingView = Backbone.View.extend({
-    initialize: function (options) {
-        $(".settings-content").removeClass('active');
-        this.sidebar = new Sidebar({
-            el: '.settings-sidebar',
-            pane: options.pane,
-            model:this.model
-        });
-        this.listenTo(myApp.router, 'route:settings', this.changePane);
-        
-    },
-    changePane: function (pane) {
-        if (!pane) {
-            return;
-        }
-        this.sidebar.showContent(pane);
-    },
-    render: function () {
-        this.sidebar.render();
-//        if(!this.sidebar.pane)
-//        	this.showContent('general');
-//        else
-//        	this.sidebar.renderPane({});
-    }
-});
+/*************************************************Views for Notifications *****************************/
 /**
      * This handles Notification groups
      */
@@ -190,6 +166,33 @@ Notification.Collection = Backbone.View.extend({
         });
     }
 });
+/*************************************************Views for Settings *****************************/
+var SettingView = Backbone.View.extend({
+    initialize: function (options) {
+        $(".settings-content").removeClass('active');
+        this.sidebar = new Sidebar({
+            el: '.settings-sidebar',
+            pane: options.pane,
+            model: this.model
+        });
+        this.listenTo(myApp.router, 'route:settings', this.changePane);
+        
+    },
+    changePane: function (pane) {
+        if (!pane) {
+            return;
+        }
+        this.sidebar.showContent(pane);
+    },
+    render: function () {
+        this.sidebar.render();
+//        if(!this.sidebar.pane)
+//        	this.showContent('general');
+//        else
+//        	this.sidebar.renderPane({});
+    }
+});
+
 var Sidebar = Backbone.View.extend({
     initialize: function (options) {
     	
@@ -210,7 +213,9 @@ var Sidebar = Backbone.View.extend({
     
         //$(this.el).html("bb");
         var ml = tpSidebar({});
-        ml=ml.substring(1);
+        if (ml[0] != '<') {
+            ml = ml.substring(1);
+        }
         this.$el.html('');
        this.$el.html(ml);
     	return this;
@@ -476,7 +481,10 @@ Settings.keywordreply = Settings.Pane.extend({
         self.$el.attr('id', this.id);
         self.$el.addClass('active');
     },
-    renderCollection:function(){
+    renderCollection: function (){
+        // Remove all keywords
+        var toRemove = $('.keywords > tr').not('#header');
+        toRemove.remove();
     	var headrow=$('#header');
     	var self=this;
     	this.collection.forEach(function(item){
@@ -577,7 +585,8 @@ Settings.replymaterial = Settings.Pane.extend({
             this.collection = new Obiwang.Collections.ReplyMaterial();
             this.collection.fetch({ reset: true });
         }
-        this.collection.on("reset", this.render, this);
+        this.render();
+        this.collection.on("reset", this.renderCollection, this);
     },
     events:{
         'click button.expand': 'expand',
@@ -593,8 +602,7 @@ Settings.replymaterial = Settings.Pane.extend({
     },
     render: function () {
         var self = this;
-        var data = self.collection?self.collection.toJSON():{};
-        var ml = tpMaterial({ materials: data });
+        var ml = tpMaterial();
         if (ml[0] != '<') {
             ml = ml.substring(1);
         }
@@ -603,13 +611,24 @@ Settings.replymaterial = Settings.Pane.extend({
         self.$el.addClass('active');
         console.log(this.collection);
     },
+    renderCollection: function () {
+        // Remove all keywords
+        var toRemove = $('.materials > tr').not('#header');
+        toRemove.remove();
+        var headrow = $('#header');
+        var self = this;
+        this.collection.forEach(function (item) {
+            var ele = self.singleTemplate(item.toJSON());
+            var toInsert = $('<div/>').html(ele).contents();
+            toInsert.insertAfter(headrow);
+        });
+    },
     renderSingle: function (id) {
         var thisrow = $('#' + id);
         var self=this;
         if (thisrow.length<1){
         	// add a row
         }else{
-	        
 	        var thismat= new Obiwang.Models.ReplyMaterial({ idReplyMaterial: id });
 	        thismat.fetch().done(function () {
 	            thisrow.empty();
@@ -618,7 +637,20 @@ Settings.replymaterial = Settings.Pane.extend({
     	}
     }
 });
-
+Settings.replymaterial_add = Settings.Pane.extend({
+    id: "replymaterial_add",
+    template: tpMaterialAdd,
+    render: function () {
+        var ml = this.template();
+        if (ml[0] != '<') {
+            ml = ml.substring(1);
+        }        
+        this.$el.html(ml);
+        this.$el.attr('id', this.id);
+        this.$el.addClass('active');
+            
+    }   
+});
 module.exports={
 		Setting:SettingView,
 		Sidebar:Sidebar,

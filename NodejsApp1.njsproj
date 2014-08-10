@@ -23,6 +23,7 @@
     <Content Include="Client\template\modals\material.hbs" />
     <Content Include="Client\template\notification.hbs" />
     <Content Include="Client\template\modals\reply.hbs" />
+    <Content Include="Client\template\replymaterial_add.hbs" />
     <Content Include="package.json" />
     <Content Include="public\assets\css\divTable.css" />
     <Content Include="public\assets\css\ghost-ui.css" />
