@@ -640,6 +640,15 @@ Settings.replymaterial = Settings.Pane.extend({
 Settings.replymaterial_add = Settings.Pane.extend({
     id: "replymaterial_add",
     template: tpMaterialAdd,
+    events: {
+        'change select#MsgType ': 'switchtype',
+    },
+    switchtype: function (){
+        $('.details').removeClass('active');
+        var sel = $('select#MsgType').val();
+        var activeField = $('#for-' + sel);
+        activeField.addClass('active');
+    },
     render: function () {
         var ml = this.template();
         if (ml[0] != '<') {
